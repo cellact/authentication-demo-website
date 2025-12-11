@@ -1,19 +1,31 @@
 {
-  "name": "authentication-demo-backend",
+  "name": "oasis-auth-backend",
   "version": "1.0.0",
-  "description": "Backend API for authentication demo",
-  "main": "server.js",
-  "type": "module",
+  "description": "GCP Cloud Functions for Oasis authentication demo",
+  "main": "index.js",
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
-    "start": "node server.js",
-    "dev": "node --watch server.js"
+    "start": "functions-framework --target=createUser --port=8080",
+    "deploy-create": "gcloud functions deploy createUser --runtime nodejs18 --trigger-http --allow-unauthenticated --entry-point createUser",
+    "deploy-delete": "gcloud functions deploy deleteUser --runtime nodejs18 --trigger-http --allow-unauthenticated --entry-point deleteUser",
+    "deploy-all": "npm run deploy-create && npm run deploy-delete"
   },
   "dependencies": {
-    "express": "^4.18.2",
-    "cors": "^2.8.5",
-    "ethers": "^6.9.0",
-    "dotenv": "^16.3.1"
-  }
+    "@google-cloud/functions-framework": "^3.3.0",
+    "@oasisprotocol/sapphire-paratime": "^1.3.0",
+    "dotenv": "^16.4.5",
+    "ethers": "^5.7.2",
+    "arnacon-sdk": "1.0.15"
+  },
+  "keywords": [
+    "oasis",
+    "authentication",
+    "blockchain",
+    "gcp",
+    "cloud-functions"
+  ],
+  "author": "",
+  "license": "MIT"
 }
-
-
