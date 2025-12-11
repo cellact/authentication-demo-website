@@ -51,7 +51,6 @@ export async function addUser({ authUsername, username, password, domain }) {
   // For now, store in-memory
   users.set(authUsername, user);
 
-  console.log(`User added: ${authUsername}`);
   return user;
 }
 
@@ -69,7 +68,6 @@ export async function deleteUser(authUsername) {
   // await tx.wait();
 
   users.delete(authUsername);
-  console.log(`User deleted: ${authUsername}`);
 }
 
 /**
@@ -100,4 +98,5 @@ export async function authenticateAndSign(authUsername, password, transactionDat
     message: 'Transaction signed and broadcasted'
   };
 }
+
 

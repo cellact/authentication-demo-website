@@ -8,8 +8,8 @@ function App() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [showForm, setShowForm] = useState(false);
 
-  // Load users on mount
   useEffect(() => {
     loadUsers();
   }, []);
@@ -32,6 +32,7 @@ function App() {
       setError(null);
       await addUser(userData);
       await loadUsers();
+      setShowForm(false);
     } catch (err) {
       setError(err.message);
       throw err;
@@ -39,7 +40,7 @@ function App() {
   };
 
   const handleDeleteUser = async (authUsername) => {
-    if (!confirm(`Delete user ${authUsername}?`)) return;
+    if (!confirm(`Delete ${authUsername}?`)) return;
     
     try {
       setError(null);
@@ -52,52 +53,42 @@ function App() {
 
   return (
     <div className="app">
-      <header className="app-header">
-        <h1>🔐 Authentication Demo</h1>
-        <p className="subtitle">Hoodi Network - Oasis Sapphire TEE Integration</p>
+      <header>
+        <h1>Authentication Demo</h1>
       </header>
 
-      <main className="app-main">
-        {error && (
-          <div className="error-banner">
-            <strong>Error:</strong> {error}
-          </div>
-        )}
+      <main>
+        {error && <div className="error">{error}</div>}
 
-        <section className="section">
-          <h2>Add New User</h2>
-          <AddUserForm onSubmit={handleAddUser} />
-        </section>
-
-        <section className="section">
-          <div className="section-header">
-            <h2>Users ({users.length})</h2>
-            <button 
-              onClick={loadUsers} 
-              disabled={loading}
-              className="btn-secondary"
-            >
-              {loading ? 'Loading...' : 'Refresh'}
-            </button>
-          </div>
+        <div className="panel">
+          <h2>Your Accounts</h2>
           <UserList 
             users={users} 
             onDelete={handleDeleteUser}
             loading={loading}
           />
-        </section>
-      </main>
+        </div>
 
-      <footer className="app-footer">
-        <p>
-          Backend: Express API → Frontend: React SPA
-          <br />
-          Oasis Sapphire (TEE) + Hoodi Network
-        </p>
-      </footer>
+        <div className="panel small">
+          {!showForm ? (
+            <button onClick={() => setShowForm(true)} className="btn-create">
+              Create New Account
+            </button>
+          ) : (
+            <>
+              <h3>New Account</h3>
+              <AddUserForm 
+                onSubmit={handleAddUser}
+                onCancel={() => setShowForm(false)}
+              />
+            </>
+          )}
+        </div>
+      </main>
     </div>
   );
 }
 
 export default App;
+
 

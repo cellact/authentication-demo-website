@@ -1,65 +1,62 @@
-import React from 'react';
+import { useState } from 'react';
 import './UserList.css';
 
 function UserList({ users, onDelete, loading }) {
+  const [revealed, setRevealed] = useState({});
+
+  const togglePassword = (authUsername) => {
+    setRevealed(prev => ({
+      ...prev,
+      [authUsername]: !prev[authUsername]
+    }));
+  };
+
   if (loading) {
-    return <div className="loading">Loading users...</div>;
+    return <div className="loading">Loading...</div>;
   }
 
   if (users.length === 0) {
-    return (
-      <div className="empty-state">
-        <p>No users yet. Add one above!</p>
-      </div>
-    );
+    return <div className="empty">No accounts yet</div>;
   }
 
   return (
-    <div className="user-list">
-      {users.map((user) => (
-        <div key={user.authUsername} className="user-card">
-          <div className="user-card-header">
-            <h3>{user.username}</h3>
-            <button 
-              onClick={() => onDelete(user.authUsername)}
-              className="btn-delete"
-              title="Delete user"
-            >
-              ✕
-            </button>
-          </div>
-          
-          <div className="user-details">
-            <div className="detail-row">
-              <span className="label">Auth Username:</span>
-              <code>{user.authUsername}</code>
-            </div>
-            <div className="detail-row">
-              <span className="label">Username:</span>
-              <code>{user.username}</code>
-            </div>
-            <div className="detail-row">
-              <span className="label">Password:</span>
-              <code>{user.password}</code>
-            </div>
-            {user.domain && (
-              <div className="detail-row">
-                <span className="label">Domain:</span>
-                <code>{user.domain}</code>
-              </div>
-            )}
-            {user.createdAt && (
-              <div className="detail-row">
-                <span className="label">Created:</span>
-                <span>{new Date(user.createdAt).toLocaleString()}</span>
-              </div>
-            )}
-          </div>
-        </div>
-      ))}
-    </div>
+    <table className="user-table">
+      <thead>
+        <tr>
+          <th>Username</th>
+          <th>Auth Name</th>
+          <th>Password</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {users.map((user) => (
+          <tr key={user.authUsername}>
+            <td>{user.username}</td>
+            <td>{user.authUsername}</td>
+            <td>
+              <span 
+                onClick={() => togglePassword(user.authUsername)}
+                className="password-toggle"
+              >
+                {revealed[user.authUsername] ? user.password : '••••••••'}
+              </span>
+            </td>
+            <td>
+              <button 
+                onClick={() => onDelete(user.authUsername)}
+                className="btn-delete"
+              >
+                delete
+              </button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
   );
 }
 
 export default UserList;
+
 
