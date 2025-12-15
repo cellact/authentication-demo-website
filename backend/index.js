@@ -96,11 +96,12 @@ async function registerENSSubdomain(username, userAddress) {
   console.log(`   name: ${DOMAIN_NAME}`);
   console.log(`   expiry: ${expiry}`);
   
-  // Step 1: Register subdomain with Oasis wallet as owner
-  console.log(`📍 Registering subdomain with Oasis wallet as owner...`);
+  // Step 1: Register subdomain with PKEY as temporary owner
+  console.log(`📍 Registering subdomain with PKEY as temporary owner...`);
+  const pkeyAddress = wallet.address;
   
   const tx = await secondLevelInteractor.registerSubnodeRecord(
-    userAddress,    // owner - Oasis user's wallet address
+    pkeyAddress,    // owner - PKEY wallet (temporary)
     username,       // label - the subdomain
     DOMAIN_NAME,    // name - the parent domain (WITHOUT .global)
     expiry          // expiry - 1 year from now
@@ -108,36 +109,55 @@ async function registerENSSubdomain(username, userAddress) {
   
   console.log(`📍 Transaction submitted: ${tx.hash}`);
   const receipt = await tx.wait();
-  console.log(`✅ ENS subdomain registered!`);
+  console.log(`✅ ENS subdomain registered with PKEY as owner!`);
   
   const fullDomain = `${username}.${DOMAIN_NAME}.global`;
   console.log(`📍 Full domain: ${fullDomain}`);
   
-  // Step 2: Set address record via SecondLevelInteractor.executeTransaction
-  console.log(`\n📍 Setting address record via controller...`);
+  // Step 2: Set the address record on PublicResolver (pointing to Oasis wallet)
+  console.log(`\n📍 Setting address record on PublicResolver...`);
   const publicResolverAddress = '0x9427fF61d53deDB42102d84E0EC2927F910eF8f2';
+  const publicResolverAbi = artifacts.PublicResolver.abi;
   
-  // Encode the setAddr call for PublicResolver
-  const subdomainNode = ethers.utils.namehash(fullDomain);
-  const resolverInterface = new ethers.utils.Interface([
-    "function setAddr(bytes32 node, address a) external"
-  ]);
-  
-  const setAddrData = resolverInterface.encodeFunctionData('setAddr', [subdomainNode, userAddress]);
-  
-  console.log(`📍 Subdomain node: ${subdomainNode}`);
-  console.log(`📍 Setting address to: ${userAddress}`);
-  console.log(`📍 Calling executeTransaction on SecondLevelInteractor...`);
-  
-  // Execute the setAddr call through the controller
-  const executeTx = await secondLevelInteractor.executeTransaction(
+  const publicResolver = new ethers.Contract(
     publicResolverAddress,
-    setAddrData
+    publicResolverAbi,
+    wallet
   );
   
-  console.log(`📍 executeTransaction submitted: ${executeTx.hash}`);
-  const executeReceipt = await executeTx.wait();
-  console.log(`✅ Address record set via controller!`);
+  const subdomainNode = ethers.utils.namehash(fullDomain);
+  console.log(`📍 Subdomain node: ${subdomainNode}`);
+  console.log(`📍 Setting address to Oasis wallet: ${userAddress}`);
+  
+  const setAddrTx = await publicResolver['setAddr(bytes32,address)'](subdomainNode, userAddress);
+  console.log(`📍 setAddr transaction submitted: ${setAddrTx.hash}`);
+  
+  const setAddrReceipt = await setAddrTx.wait();
+  console.log(`✅ Address record set on PublicResolver!`);
+  
+  // Step 3: Transfer subdomain NFT ownership to Oasis wallet
+  console.log(`\n📍 Transferring subdomain ownership to Oasis wallet...`);
+  const nameWrapperAddress = '0x0140420b3e02b1A7d4645cE330337bc8742C3Df5';
+  const nameWrapperAbi = artifacts.NameWrapper.abi;
+  
+  const nameWrapper = new ethers.Contract(
+    nameWrapperAddress,
+    nameWrapperAbi,
+    wallet
+  );
+  
+  const tokenId = ethers.BigNumber.from(subdomainNode);
+  const transferTx = await nameWrapper.safeTransferFrom(
+    pkeyAddress,    // from - current owner (PKEY)
+    userAddress,    // to - new owner (Oasis wallet)
+    tokenId,        // tokenId - the subdomain node
+    1,              // amount - always 1 for ERC1155 NFTs
+    '0x'            // data - empty
+  );
+  
+  console.log(`📍 Transfer transaction submitted: ${transferTx.hash}`);
+  const transferReceipt = await transferTx.wait();
+  console.log(`✅ Subdomain ownership transferred to Oasis wallet!`);
   
   return {
     txHash: receipt.transactionHash,
