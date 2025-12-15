@@ -4,19 +4,20 @@ const sapphire = require('@oasisprotocol/sapphire-paratime');
 const ArnaconSDK = require('arnacon-sdk');
 
 // Oasis Sapphire Testnet Configuration
-const INTERACTOR_ADDRESS = '0xf62848BEb89127cA25d77BFaadAb5485e0618B35';
+const CONFIDENTIAL_AUTH_ADDRESS = '0xf4B4d8b8a9b1F104b2100F6d68e1ab21C3a2DF76'; // ConfidentialAuthAddressBased
 const OASIS_SAPPHIRE_TESTNET_RPC = 'https://testnet.sapphire.oasis.io';
 
 // Hoodi Network Configuration
 const HOODI_CHAIN_ID = 560048;
 const DOMAIN_NAME = 'authdemo1765462240433'; // Your registered domain name (without .global)
 
-// Contract ABIs
-const INTERACTOR_ABI = [
-  "function createUser(string memory username, bytes calldata secret) external returns (address userAddress, bytes memory publicKey)",
-  "function deleteUser(string memory username) external",
-  "function getUserInfo(string memory username) external view returns (address userAddress, bytes memory publicKey, bool hasSecret)",
-  "function userExists(string memory username) external view returns (bool)"
+// Contract ABIs (ConfidentialAuthAddressBased - stores passwords as bytes)
+const CONFIDENTIAL_AUTH_ABI = [
+  "function storeSecret(string memory username, bytes calldata secret) external",
+  "function deleteSecret(string memory username, bytes calldata secret) external",
+  "function getWalletAddress(string memory username) external view returns (address)",
+  "function authenticateUser(string memory username, string memory realm, string memory method, string memory uri, string memory nonce, uint8 algo, bytes memory response) external view returns (bool)",
+  "function getDigestHash(string memory username, string memory realm, string memory method, string memory uri, string memory nonce, uint8 algo) external view returns (bytes memory)"
 ];
 
 /**
@@ -66,21 +67,83 @@ async function registerENSSubdomain(username, userAddress) {
   console.log(`📍 SDK initialized for ${sdk.getNetworkName()}`);
   console.log(`📍 Signer: ${sdk.getSignerAddress()}`);
   
-  // Register subdomain using SDK
-  // registerSubdomain(owner, label, name)
-  const result = await sdk.registerSubdomain(
-    userAddress,    // owner - the Oasis user's wallet address
-    username,       // label - the subdomain 
-    DOMAIN_NAME     // name - the parent domain (e.g., "authdemo1765462240433.global")
+  // Get the SecondLevelInteractor contract address for this domain owner
+  const secondLevelInteractorAddress = '0x5bA6D4749AE9573f703E19f9197AE783dFaa78f8'; // From hoodi-addresses.json
+  
+  // Load SecondLevelInteractor ABI from SDK artifacts
+  const { artifacts } = require('arnacon-sdk/dist/artifacts');
+  const secondLevelInteractorAbi = artifacts.SecondLevelInteractor.abi;
+  
+  console.log(`📍 Loaded ABI with ${secondLevelInteractorAbi.length} functions`);
+  
+  // Connect to the contract
+  const provider = new ethers.providers.JsonRpcProvider('https://rpc.hoodi.ethpandaops.io');
+  const wallet = new ethers.Wallet(privateKey, provider);
+  const secondLevelInteractor = new ethers.Contract(
+    secondLevelInteractorAddress,
+    secondLevelInteractorAbi,
+    wallet
   );
   
-  console.log(`✅ ENS subdomain registered via SDK!`);
-  console.log(`📍 Full domain: ${result.fullDomain}`);
+  // Register subdomain with resolver using registerSubnodeRecord
+  // This sets BOTH the owner AND the PublicResolver in one transaction
+  const oneYearInSeconds = 365 * 24 * 60 * 60;
+  const expiry = Math.floor(Date.now() / 1000) + oneYearInSeconds;
+  
+  console.log(`📍 Calling registerSubnodeRecord with:`);
+  console.log(`   owner: ${userAddress}`);
+  console.log(`   label: ${username}`);
+  console.log(`   name: ${DOMAIN_NAME}`);
+  console.log(`   expiry: ${expiry}`);
+  
+  // Step 1: Register subdomain with Oasis wallet as owner
+  console.log(`📍 Registering subdomain with Oasis wallet as owner...`);
+  
+  const tx = await secondLevelInteractor.registerSubnodeRecord(
+    userAddress,    // owner - Oasis user's wallet address
+    username,       // label - the subdomain
+    DOMAIN_NAME,    // name - the parent domain (WITHOUT .global)
+    expiry          // expiry - 1 year from now
+  );
+  
+  console.log(`📍 Transaction submitted: ${tx.hash}`);
+  const receipt = await tx.wait();
+  console.log(`✅ ENS subdomain registered!`);
+  
+  const fullDomain = `${username}.${DOMAIN_NAME}.global`;
+  console.log(`📍 Full domain: ${fullDomain}`);
+  
+  // Step 2: Set address record via SecondLevelInteractor.executeTransaction
+  console.log(`\n📍 Setting address record via controller...`);
+  const publicResolverAddress = '0x9427fF61d53deDB42102d84E0EC2927F910eF8f2';
+  
+  // Encode the setAddr call for PublicResolver
+  const subdomainNode = ethers.utils.namehash(fullDomain);
+  const resolverInterface = new ethers.utils.Interface([
+    "function setAddr(bytes32 node, address a) external"
+  ]);
+  
+  const setAddrData = resolverInterface.encodeFunctionData('setAddr', [subdomainNode, userAddress]);
+  
+  console.log(`📍 Subdomain node: ${subdomainNode}`);
+  console.log(`📍 Setting address to: ${userAddress}`);
+  console.log(`📍 Calling executeTransaction on SecondLevelInteractor...`);
+  
+  // Execute the setAddr call through the controller
+  const executeTx = await secondLevelInteractor.executeTransaction(
+    publicResolverAddress,
+    setAddrData
+  );
+  
+  console.log(`📍 executeTransaction submitted: ${executeTx.hash}`);
+  const executeReceipt = await executeTx.wait();
+  console.log(`✅ Address record set via controller!`);
   
   return {
-    txHash: result.transactionHash || 'N/A',
-    subdomain: result.fullDomain,
-    secondLevelInteractor: result.secondLevelInteractor
+    txHash: receipt.transactionHash,
+    subdomain: fullDomain,
+    secondLevelInteractor: secondLevelInteractorAddress,
+    setAddrTxHash: setAddrReceipt.transactionHash
   };
 }
 
@@ -160,41 +223,42 @@ async function handleCreateUser(req, res) {
     // Connect to Oasis Sapphire
     const { signer } = getSapphireConnection();
     
-    // Get Interactor contract instance
-    const interactor = new ethers.Contract(INTERACTOR_ADDRESS, INTERACTOR_ABI, signer);
+    // Get ConfidentialAuthAddressBased contract instance
+    const confidentialAuth = new ethers.Contract(CONFIDENTIAL_AUTH_ADDRESS, CONFIDENTIAL_AUTH_ABI, signer);
     
-    // Check if user already exists
-    const exists = await interactor.userExists(username);
-    if (exists) {
-      res.status(400).json({
-        success: false,
-        error: `User '${username}' already exists on Oasis`
-      });
-      return;
+    // Check if user already exists (try to get wallet address)
+    try {
+      const existingAddress = await confidentialAuth.getWalletAddress(username);
+      if (existingAddress) {
+        res.status(400).json({
+          success: false,
+          error: `User '${username}' already exists on Oasis`
+        });
+        return;
+      }
+    } catch (error) {
+      // User doesn't exist, which is what we want
+      console.log('📍 User does not exist yet, proceeding with creation');
     }
 
-    // Convert password to bytes (UTF-8 encoding) - ethers v5 syntax
+    // Create user on Oasis Sapphire (password stored as bytes)
+    console.log('📍 Calling storeSecret on ConfidentialAuth contract...');
     const passwordBytes = ethers.utils.toUtf8Bytes(password);
+    console.log('📍 Password as bytes:', ethers.utils.hexlify(passwordBytes));
     
-    // Create user on Oasis Sapphire
-    console.log('📍 Calling createUser on Interactor contract...');
-    const tx = await interactor.createUser(username, passwordBytes);
+    const tx = await confidentialAuth.storeSecret(username, passwordBytes);
     console.log('📍 Transaction submitted:', tx.hash);
     
     // Wait for confirmation
     const receipt = await tx.wait();
     console.log('✅ Transaction confirmed! Block:', receipt.blockNumber);
     
-    // Get user info to retrieve the generated address
-    const userInfo = await interactor.getUserInfo(username);
-    const userAddress = userInfo[0]; // First element is the address
-    const publicKey = userInfo[1];   // Second element is the public key
-    const hasSecret = userInfo[2];   // Third element is hasSecret boolean
+    // Get user wallet address
+    const userAddress = await confidentialAuth.getWalletAddress(username);
     
     console.log('📍 User created successfully on Oasis!');
     console.log('  Address:', userAddress);
-    console.log('  Public Key:', ethers.utils.hexlify(publicKey));
-    console.log('  Has Secret:', hasSecret);
+    console.log('  Password stored as bytes (confidential)');
 
     // Register ENS subdomain on Hoodi
     console.log('\n📍 Registering ENS subdomain on Hoodi...');
@@ -218,8 +282,8 @@ async function handleCreateUser(req, res) {
       oasis: {
         txHash: tx.hash,
         userAddress,
-        publicKey: ethers.utils.hexlify(publicKey),
-        blockNumber: receipt.blockNumber
+        blockNumber: receipt.blockNumber,
+        contractAddress: CONFIDENTIAL_AUTH_ADDRESS
       },
       ens: {
         subdomain: ensResult.subdomain,
@@ -267,13 +331,13 @@ async function handleCreateUser(req, res) {
 async function handleDeleteUser(req, res) {
 
   try {
-    const { authUsername } = req.body;
+    const { authUsername, password } = req.body;
 
     // Validate input
-    if (!authUsername) {
+    if (!authUsername || !password) {
       res.status(400).json({ 
         success: false, 
-        error: 'Missing required field: authUsername' 
+        error: 'Missing required fields: authUsername, password' 
       });
       return;
     }
@@ -283,12 +347,13 @@ async function handleDeleteUser(req, res) {
     // Connect to Oasis Sapphire
     const { signer } = getSapphireConnection();
     
-    // Get Interactor contract instance
-    const interactor = new ethers.Contract(INTERACTOR_ADDRESS, INTERACTOR_ABI, signer);
+    // Get ConfidentialAuthAddressBased contract instance
+    const confidentialAuth = new ethers.Contract(CONFIDENTIAL_AUTH_ADDRESS, CONFIDENTIAL_AUTH_ABI, signer);
     
     // Check if user exists
-    const exists = await interactor.userExists(authUsername);
-    if (!exists) {
+    try {
+      await confidentialAuth.getWalletAddress(authUsername);
+    } catch (error) {
       res.status(404).json({
         success: false,
         error: `User '${authUsername}' does not exist on Oasis`
@@ -296,9 +361,10 @@ async function handleDeleteUser(req, res) {
       return;
     }
 
-    // Delete user on Oasis Sapphire
-    console.log('📍 Calling deleteUser on Interactor contract...');
-    const tx = await interactor.deleteUser(authUsername);
+    // Delete user on Oasis Sapphire (requires password authentication)
+    console.log('📍 Calling deleteSecret on ConfidentialAuth contract...');
+    const passwordBytes = ethers.utils.toUtf8Bytes(password);
+    const tx = await confidentialAuth.deleteSecret(authUsername, passwordBytes);
     console.log('📍 Transaction submitted:', tx.hash);
     
     // Wait for confirmation

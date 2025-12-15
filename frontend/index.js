@@ -14,6 +14,7 @@ const formContainer = document.getElementById('form-container');
 const addUserForm = document.getElementById('add-user-form');
 const btnCancel = document.getElementById('btn-cancel');
 const btnSubmit = document.getElementById('btn-submit');
+const btnClearAll = document.getElementById('btn-clear-all');
 const usernameInput = document.getElementById('username');
 const passwordInput = document.getElementById('password');
 
@@ -29,6 +30,7 @@ function attachEventListeners() {
   btnShowForm.addEventListener('click', showForm);
   btnCancel.addEventListener('click', hideForm);
   addUserForm.addEventListener('submit', handleAddUser);
+  btnClearAll.addEventListener('click', handleClearAllData);
 }
 
 // Storage Functions
@@ -49,6 +51,113 @@ function saveUsersToStorage() {
     console.error('Error saving to localStorage:', err);
     showError('Failed to save to local storage');
   }
+}
+
+async function handleClearAllData() {
+  if (!confirm('⚠️ This will DELETE ALL users from the blockchain and clear all local data. Are you sure?')) {
+    return;
+  }
+
+  // Disable button to prevent double-clicks
+  btnClearAll.disabled = true;
+  btnClearAll.textContent = 'Deleting...';
+
+  try {
+    const usersToDelete = [...users]; // Copy array
+    
+    if (usersToDelete.length === 0) {
+      // No users to delete, just clear storage
+      clearLocalData();
+      alert('✅ All local data cleared!');
+      window.location.reload();
+      return;
+    }
+
+    console.log(`🗑️  Deleting ${usersToDelete.length} users from blockchain...`);
+    
+    let successCount = 0;
+    let failCount = 0;
+    
+    // Delete each user from the blockchain
+    for (let i = 0; i < usersToDelete.length; i++) {
+      const user = usersToDelete[i];
+      btnClearAll.textContent = `Deleting ${i + 1}/${usersToDelete.length}...`;
+      
+      try {
+        console.log(`📍 Deleting user: ${user.authUsername}`);
+        
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Function-Name': 'deleteUser'
+          },
+          body: JSON.stringify({
+            authUsername: user.authUsername
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          console.log(`✅ Deleted user: ${user.authUsername} (tx: ${data.txHash})`);
+          successCount++;
+        } else {
+          console.error(`❌ Failed to delete ${user.authUsername}:`, data.error);
+          failCount++;
+        }
+      } catch (error) {
+        console.error(`❌ Error deleting ${user.authUsername}:`, error);
+        failCount++;
+      }
+    }
+
+    // Show summary
+    console.log(`\n📊 Deletion Summary:`);
+    console.log(`   ✅ Success: ${successCount}`);
+    console.log(`   ❌ Failed: ${failCount}`);
+    
+    // Now clear all local data
+    clearLocalData();
+    
+    // Show result to user
+    if (failCount === 0) {
+      alert(`✅ All ${successCount} users deleted successfully from blockchain!\n\nLocal data cleared. Page will reload.`);
+    } else {
+      alert(`⚠️ Deleted ${successCount} users successfully.\n${failCount} failed to delete.\n\nLocal data cleared anyway. Page will reload.`);
+    }
+    
+    // Reload to ensure clean state
+    window.location.reload();
+    
+  } catch (err) {
+    console.error('Error clearing data:', err);
+    showError('Failed to clear all data: ' + err.message);
+    btnClearAll.disabled = false;
+    btnClearAll.textContent = 'Clear All Data';
+  }
+}
+
+function clearLocalData() {
+  // Clear localStorage
+  localStorage.clear();
+  
+  // Clear all cookies
+  document.cookie.split(';').forEach(cookie => {
+    const cookieName = cookie.split('=')[0].trim();
+    document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+    // Also try with domain
+    document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${window.location.hostname}`;
+  });
+  
+  // Clear sessionStorage as well
+  sessionStorage.clear();
+  
+  // Reset app state
+  users = [];
+  revealedPasswords.clear();
+  
+  console.log('✅ All local data cleared');
 }
 
 // UI Functions
@@ -226,13 +335,22 @@ async function handleDeleteUser(authUsername) {
   }
   
   try {
+    // Get password from localStorage
+    const users = JSON.parse(localStorage.getItem('registeredUsers')) || [];
+    const user = users.find(u => u.authUsername === authUsername);
+    
+    if (!user || !user.password) {
+      alert('Cannot delete user: password not found in local storage');
+      return;
+    }
+    
     // Show loading state
     const deleteBtn = document.querySelector(`button[data-auth="${authUsername}"]`);
     const originalText = deleteBtn.textContent;
     deleteBtn.disabled = true;
     deleteBtn.textContent = 'deleting...';
     
-    // Call backend to delete user from Oasis
+    // Call backend to delete user from Oasis (requires password)
     const response = await fetch(API_URL, {
       method: 'POST',
       headers: {
@@ -240,7 +358,8 @@ async function handleDeleteUser(authUsername) {
         'X-Function-Name': 'deleteUser' // Route to deleteUser function
       },
       body: JSON.stringify({
-        authUsername
+        authUsername,
+        password: user.password
       })
     });
     
