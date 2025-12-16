@@ -38,6 +38,86 @@ input:focus {
   max-width: 900px;
   margin: 0 auto;
   padding: 20px;
+  min-height: 100vh;
+}
+
+/* Auth Gate */
+#auth-gate {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+}
+
+.auth-container {
+  text-align: center;
+  max-width: 400px;
+  background: #fff;
+  padding: 40px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.auth-container h1 {
+  font-size: 24px;
+  font-weight: normal;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.auth-container p {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 30px;
+  line-height: 1.5;
+}
+
+.magic-link-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 350px;
+}
+
+.magic-link-form input[type="email"] {
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  font-size: 15px;
+}
+
+.magic-link-form input[type="email"]:focus {
+  outline: none;
+  border-color: #333;
+}
+
+.btn-primary {
+  background: #333;
+  color: #fff;
+  border: 1px solid #333;
+  padding: 12px 24px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all 0.2s;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #000;
+  border-color: #000;
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.magic-link-note {
+  font-size: 13px;
+  color: #888;
+  margin-top: 5px;
 }
 
 header {
@@ -45,6 +125,36 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-email {
+  font-size: 14px;
+  color: #666;
+  padding: 8px 12px;
+  background: #f5f5f5;
+  border-radius: 3px;
+}
+
+.btn-secondary {
+  background: #fff;
+  border: 1px solid #666;
+  color: #666;
+  padding: 8px 16px;
+  font-size: 13px;
+  border-radius: 3px;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.btn-secondary:hover {
+  background: #666;
+  color: #fff;
 }
 
 header h1 {
@@ -125,6 +235,35 @@ main {
   width: 100%;
 }
 
+.username-display {
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  padding: 15px;
+  border-radius: 3px;
+  margin-bottom: 5px;
+}
+
+.username-display label {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.generated-username {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  font-family: monospace;
+  padding: 8px 0;
+}
+
+.username-note {
+  display: block;
+  font-size: 12px;
+  color: #888;
+  margin-top: 5px;
+}
+
 .form-actions {
   display: flex;
   gap: 10px;
@@ -203,5 +342,97 @@ main {
   padding: 20px;
   text-align: center;
   color: #999;
+}
+
+/* SIP Instructions */
+.sip-instructions {
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  padding: 12px;
+  margin-bottom: 15px;
+  border-radius: 3px;
+}
+
+.sip-instructions p {
+  margin: 0;
+  font-size: 14px;
+  color: #555;
+  line-height: 1.5;
+}
+
+.sip-instructions code {
+  background: #fff;
+  padding: 2px 6px;
+  border: 1px solid #ddd;
+  border-radius: 2px;
+  font-family: monospace;
+  font-size: 13px;
+  color: #333;
+}
+
+/* Creation Status */
+.creation-status {
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  padding: 25px;
+  margin: 10px 0;
+  border-radius: 3px;
+  text-align: center;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  margin: 0 auto 15px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #333;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.status-text {
+  color: #555;
+  line-height: 1.6;
+}
+
+.status-text p {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+}
+
+.status-text p:last-child {
+  margin-bottom: 0;
+}
+
+.status-text strong {
+  font-weight: 600;
+  color: #333;
+}
+
+/* Password Cell */
+.password-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-copy {
+  background: none;
+  border: 1px solid #ddd;
+  padding: 2px 6px;
+  font-size: 14px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-copy:hover {
+  background: #f5f5f5;
+  border-color: #333;
 }
 

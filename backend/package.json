@@ -15,9 +15,10 @@
   "dependencies": {
     "@google-cloud/functions-framework": "^3.3.0",
     "@oasisprotocol/sapphire-paratime": "^1.3.0",
+    "arnacon-sdk": "1.0.15",
     "dotenv": "^16.4.5",
     "ethers": "^5.7.2",
-    "arnacon-sdk": "1.0.15"
+    "googleapis": "^168.0.0"
   },
   "keywords": [
     "oasis",

@@ -52,8 +52,8 @@ function getSapphireConnection() {
  * @returns {Promise<{txHash: string, subdomain: string}>}
  */
 async function registerENSSubdomain(username, userAddress) {
-  console.log(`📍 Registering ENS subdomain: ${username}.${DOMAIN_NAME}.global`);
-  console.log(`📍 Owner address: ${userAddress}`);
+  console.log(`Registering ENS subdomain: ${username}.${DOMAIN_NAME}.global`);
+  console.log(`Owner address: ${userAddress}`);
   
   const privateKey = process.env.PKEY;
   if (!privateKey) {
@@ -64,8 +64,8 @@ async function registerENSSubdomain(username, userAddress) {
   const sdk = new ArnaconSDK(privateKey, HOODI_CHAIN_ID);
   await sdk.initializeNetworkInfo();
   
-  console.log(`📍 SDK initialized for ${sdk.getNetworkName()}`);
-  console.log(`📍 Signer: ${sdk.getSignerAddress()}`);
+  console.log(`SDK initialized for ${sdk.getNetworkName()}`);
+  console.log(`Signer: ${sdk.getSignerAddress()}`);
   
   // Get the SecondLevelInteractor contract address for this domain owner
   const secondLevelInteractorAddress = '0x5bA6D4749AE9573f703E19f9197AE783dFaa78f8'; // From hoodi-addresses.json
@@ -74,7 +74,7 @@ async function registerENSSubdomain(username, userAddress) {
   const { artifacts } = require('arnacon-sdk/dist/artifacts');
   const secondLevelInteractorAbi = artifacts.SecondLevelInteractor.abi;
   
-  console.log(`📍 Loaded ABI with ${secondLevelInteractorAbi.length} functions`);
+  console.log(`Loaded ABI with ${secondLevelInteractorAbi.length} functions`);
   
   // Connect to the contract
   const provider = new ethers.providers.JsonRpcProvider('https://rpc.hoodi.ethpandaops.io');
@@ -90,14 +90,14 @@ async function registerENSSubdomain(username, userAddress) {
   const oneYearInSeconds = 365 * 24 * 60 * 60;
   const expiry = Math.floor(Date.now() / 1000) + oneYearInSeconds;
   
-  console.log(`📍 Calling registerSubnodeRecord with:`);
+  console.log(`Calling registerSubnodeRecord with:`);
   console.log(`   owner: ${userAddress}`);
   console.log(`   label: ${username}`);
   console.log(`   name: ${DOMAIN_NAME}`);
   console.log(`   expiry: ${expiry}`);
   
   // Step 1: Register subdomain with PKEY as temporary owner
-  console.log(`📍 Registering subdomain with PKEY as temporary owner...`);
+  console.log(`Registering subdomain with PKEY as temporary owner...`);
   const pkeyAddress = wallet.address;
   
   const tx = await secondLevelInteractor.registerSubnodeRecord(
@@ -107,15 +107,15 @@ async function registerENSSubdomain(username, userAddress) {
     expiry          // expiry - 1 year from now
   );
   
-  console.log(`📍 Transaction submitted: ${tx.hash}`);
+  console.log(`Transaction submitted: ${tx.hash}`);
   const receipt = await tx.wait();
-  console.log(`✅ ENS subdomain registered with PKEY as owner!`);
+  console.log(`ENS subdomain registered with PKEY as owner`);
   
   const fullDomain = `${username}.${DOMAIN_NAME}.global`;
-  console.log(`📍 Full domain: ${fullDomain}`);
+  console.log(`Full domain: ${fullDomain}`);
   
   // Step 2: Set the address record on PublicResolver (pointing to Oasis wallet)
-  console.log(`\n📍 Setting address record on PublicResolver...`);
+  console.log(`\nSetting address record on PublicResolver...`);
   const publicResolverAddress = '0x9427fF61d53deDB42102d84E0EC2927F910eF8f2';
   const publicResolverAbi = artifacts.PublicResolver.abi;
   
@@ -126,17 +126,17 @@ async function registerENSSubdomain(username, userAddress) {
   );
   
   const subdomainNode = ethers.utils.namehash(fullDomain);
-  console.log(`📍 Subdomain node: ${subdomainNode}`);
-  console.log(`📍 Setting address to Oasis wallet: ${userAddress}`);
+  console.log(`Subdomain node: ${subdomainNode}`);
+  console.log(`Setting address to Oasis wallet: ${userAddress}`);
   
   const setAddrTx = await publicResolver['setAddr(bytes32,address)'](subdomainNode, userAddress);
-  console.log(`📍 setAddr transaction submitted: ${setAddrTx.hash}`);
+  console.log(`setAddr transaction submitted: ${setAddrTx.hash}`);
   
   const setAddrReceipt = await setAddrTx.wait();
-  console.log(`✅ Address record set on PublicResolver!`);
+  console.log(`Address record set on PublicResolver`);
   
   // Step 3: Transfer subdomain NFT ownership to Oasis wallet
-  console.log(`\n📍 Transferring subdomain ownership to Oasis wallet...`);
+  console.log(`\nTransferring subdomain ownership to Oasis wallet...`);
   const nameWrapperAddress = '0x0140420b3e02b1A7d4645cE330337bc8742C3Df5';
   const nameWrapperAbi = artifacts.NameWrapper.abi;
   
@@ -155,9 +155,9 @@ async function registerENSSubdomain(username, userAddress) {
     '0x'            // data - empty
   );
   
-  console.log(`📍 Transfer transaction submitted: ${transferTx.hash}`);
+  console.log(`Transfer transaction submitted: ${transferTx.hash}`);
   const transferReceipt = await transferTx.wait();
-  console.log(`✅ Subdomain ownership transferred to Oasis wallet!`);
+  console.log(`Subdomain ownership transferred to Oasis wallet`);
   
   return {
     txHash: receipt.transactionHash,
@@ -238,18 +238,24 @@ async function handleCreateUser(req, res) {
       return;
     }
 
-    console.log('🔐 Creating Oasis user:', username);
+    console.log('Creating Oasis user:', username);
 
     // Connect to Oasis Sapphire
+    console.log('Connecting to Sapphire...');
     const { signer } = getSapphireConnection();
+    console.log('Connected to Sapphire');
     
     // Get ConfidentialAuthAddressBased contract instance
+    console.log('Getting contract instance...');
     const confidentialAuth = new ethers.Contract(CONFIDENTIAL_AUTH_ADDRESS, CONFIDENTIAL_AUTH_ABI, signer);
+    console.log('Contract instance created');
     
     // Check if user already exists (try to get wallet address)
+    console.log('Checking if user exists...');
     try {
       const existingAddress = await confidentialAuth.getWalletAddress(username);
-      if (existingAddress) {
+      console.log('Existing address:', existingAddress);
+      if (existingAddress && existingAddress !== ethers.constants.AddressZero) {
         res.status(400).json({
           success: false,
           error: `User '${username}' already exists on Oasis`
@@ -258,36 +264,40 @@ async function handleCreateUser(req, res) {
       }
     } catch (error) {
       // User doesn't exist, which is what we want
-      console.log('📍 User does not exist yet, proceeding with creation');
+      console.log('User does not exist yet (or error checking):', error.message);
     }
+    console.log('Proceeding with user creation...');
 
     // Create user on Oasis Sapphire (password stored as bytes)
-    console.log('📍 Calling storeSecret on ConfidentialAuth contract...');
+    console.log('Calling storeSecret on ConfidentialAuth contract...');
     const passwordBytes = ethers.utils.toUtf8Bytes(password);
-    console.log('📍 Password as bytes:', ethers.utils.hexlify(passwordBytes));
+    console.log('Password as bytes:', ethers.utils.hexlify(passwordBytes));
     
     const tx = await confidentialAuth.storeSecret(username, passwordBytes);
-    console.log('📍 Transaction submitted:', tx.hash);
+    console.log('Transaction submitted:', tx.hash);
     
     // Wait for confirmation
     const receipt = await tx.wait();
-    console.log('✅ Transaction confirmed! Block:', receipt.blockNumber);
+    console.log('Transaction confirmed! Block:', receipt.blockNumber);
+    
+    // Wait a bit for Sapphire to finalize the block for confidential reads
+    await new Promise(resolve => setTimeout(resolve, 2000));
     
     // Get user wallet address
     const userAddress = await confidentialAuth.getWalletAddress(username);
     
-    console.log('📍 User created successfully on Oasis!');
+    console.log('User created successfully on Oasis!');
     console.log('  Address:', userAddress);
     console.log('  Password stored as bytes (confidential)');
 
     // Register ENS subdomain on Hoodi
-    console.log('\n📍 Registering ENS subdomain on Hoodi...');
+    console.log('\nRegistering ENS subdomain on Hoodi...');
     let ensResult;
     try {
       ensResult = await registerENSSubdomain(username, userAddress);
-      console.log('✅ ENS subdomain registered:', ensResult.subdomain);
+      console.log('ENS subdomain registered:', ensResult.subdomain);
     } catch (ensError) {
-      console.error('❌ ENS registration failed:', ensError.message);
+      console.error('ENS registration failed:', ensError.message);
       // Continue even if ENS fails - user is created on Oasis
       ensResult = {
         error: ensError.message,
@@ -316,7 +326,7 @@ async function handleCreateUser(req, res) {
     });
 
   } catch (error) {
-    console.error('❌ Error creating user:', error);
+    console.error('Error creating user:', error);
     
     // Check for specific error messages
     let errorMessage = 'Failed to create user on Oasis';
@@ -362,7 +372,7 @@ async function handleDeleteUser(req, res) {
       return;
     }
 
-    console.log('🗑️  Deleting Oasis user:', authUsername);
+    console.log('Deleting Oasis user:', authUsername);
 
     // Connect to Oasis Sapphire
     const { signer } = getSapphireConnection();
@@ -382,14 +392,14 @@ async function handleDeleteUser(req, res) {
     }
 
     // Delete user on Oasis Sapphire (requires password authentication)
-    console.log('📍 Calling deleteSecret on ConfidentialAuth contract...');
+    console.log('Calling deleteSecret on ConfidentialAuth contract...');
     const passwordBytes = ethers.utils.toUtf8Bytes(password);
     const tx = await confidentialAuth.deleteSecret(authUsername, passwordBytes);
-    console.log('📍 Transaction submitted:', tx.hash);
+    console.log('Transaction submitted:', tx.hash);
     
     // Wait for confirmation
     const receipt = await tx.wait();
-    console.log('✅ Transaction confirmed! Block:', receipt.blockNumber);
+    console.log('Transaction confirmed! Block:', receipt.blockNumber);
 
     res.status(200).json({
       success: true,
@@ -400,7 +410,7 @@ async function handleDeleteUser(req, res) {
     });
 
   } catch (error) {
-    console.error('❌ Error deleting user:', error);
+    console.error('Error deleting user:', error);
     
     // Check for specific error messages
     let errorMessage = 'Failed to delete user from Oasis';

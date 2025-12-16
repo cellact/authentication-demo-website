@@ -7,11 +7,37 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="app">
-    <header>
-      <h1>Authentication Demo</h1>
-      <button id="btn-clear-all" class="btn-danger" title="Clear all local data">Clear All Data</button>
-    </header>
+  <div class="app" id="app">
+    <!-- Auth Gate (shown when not logged in) -->
+    <div id="auth-gate" style="display: none;">
+      <div class="auth-container">
+        <h1>Authentication Demo</h1>
+        <p>Create a free non-custodial wallet with ENS identity</p>
+        <form id="magic-link-form" class="magic-link-form">
+          <input 
+            type="email" 
+            id="email-input" 
+            placeholder="Enter your email" 
+            required
+          />
+          <button type="submit" id="btn-send-link" class="btn-primary">
+            Send Magic Link
+          </button>
+        </form>
+        <p class="magic-link-note">We'll send you a link to sign in securely</p>
+      </div>
+    </div>
+
+    <!-- Main App (shown when logged in) -->
+    <div id="main-app" style="display: none;">
+      <header>
+        <h1>Authentication Demo</h1>
+        <div class="header-actions">
+          <span id="user-email" class="user-email"></span>
+          <button id="btn-signout" class="btn-secondary">Sign Out</button>
+          <button id="btn-clear-all" class="btn-danger" title="Clear all local data">Clear All Data</button>
+        </div>
+      </header>
 
     <main>
       <!-- Error message -->
@@ -20,6 +46,12 @@
       <!-- User List Panel -->
       <div class="panel">
         <h2>Your Accounts</h2>
+        
+        <!-- SIP Instructions -->
+        <div class="sip-instructions">
+          <p><strong>How to use:</strong> Copy your credentials into a SIP client with domain <code>kama6.cellact.nl</code> to register and make calls over UDP.</p>
+        </div>
+        
         <div id="user-list-container">
           <div class="loading">Loading...</div>
         </div>
@@ -32,14 +64,25 @@
         <div id="form-container" style="display: none;">
           <h3>New Account</h3>
           <form id="add-user-form" class="form">
-            <div>
-              <label>Username</label>
-              <input type="text" id="username" name="username" required>
+            <div class="username-display">
+              <label>Your username will be:</label>
+              <div class="generated-username" id="generated-username">-</div>
+              <small class="username-note">Generated from your Google email</small>
             </div>
             <div>
-              <label>Password</label>
-              <input type="text" id="password" name="password" required>
+              <label>Choose a password</label>
+              <input type="text" id="password" name="password" required placeholder="Enter a password">
             </div>
+            
+            <!-- Loading status indicator -->
+            <div id="creation-status" class="creation-status" style="display: none;">
+              <div class="spinner"></div>
+              <div class="status-text">
+                <p><strong>Creating your account...</strong></p>
+                <p>We're creating a non-custodial wallet and registering an ENS identity to it. This may take a minute.</p>
+              </div>
+            </div>
+            
             <div class="form-actions">
               <button type="submit" id="btn-submit">Create</button>
               <button type="button" id="btn-cancel">Cancel</button>
@@ -48,8 +91,35 @@
         </div>
       </div>
     </main>
+    </div>
   </div>
 
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+    import { getAuth, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDJYM5wA-mzzap1OeVYxig0ZQTzFs2FqNo",
+      authDomain: "arnacon-nl.firebaseapp.com",
+      projectId: "arnacon-nl",
+      storageBucket: "arnacon-nl.firebasestorage.app",
+      messagingSenderId: "309305771885",
+      appId: "1:309305771885:web:1875906001bc0e2bcabc64",
+      measurementId: "G-Q4NKZG9JGZ"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    // Make auth available globally
+    window.firebaseAuth = auth;
+    window.sendSignInLinkToEmail = sendSignInLinkToEmail;
+    window.isSignInWithEmailLink = isSignInWithEmailLink;
+    window.signInWithEmailLink = signInWithEmailLink;
+    window.signOut = signOut;
+    window.onAuthStateChanged = onAuthStateChanged;
+  </script>
   <script src="index.js"></script>
 </body>
 </html>
