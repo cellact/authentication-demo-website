@@ -213,20 +213,30 @@ async function sendUserCredentialsEmail(customerEmail, username, password, userA
     const mailOptions = {
       from: EMAIL_FROM,
       to: customerEmail,
-      subject: 'Your account credentials',
+      subject: 'Your SIP Web3 Authentication Demo Credentials',
       text: `Hey!
 
-Here are your credentials for the authentication demo:
+Here are your credentials for the auth_web3 module demonstration:
 
 Username: ${ensSubdomain}
 Auth Username: ${username}
 Password: ${password}
 
-You can now put these into a SIP client and register to kama6.cellact.nl (use UDP transport). If you're using Zoiper or any other SIP client, just enter the username and password above with domain kama6.cellact.nl.
+These credentials authenticate via the auth_web3 module on Kamailio. To test it:
 
-Your account is secured on Oasis Sapphire blockchain and your ENS identity is registered on Hoodi network. Keep these credentials safe - your wallet is non-custodial so only you have access.
+1. Open any SIP client (Zoiper, Linphone, etc.)
+2. Enter Auth Username and Password above
+3. Set domain: kama6.cellact.nl
+4. Set transport: UDP
+5. Register and make calls
 
-If you have any questions, email ron@cellact.nl`
+Once registered, you can make calls to any other user registered on the server (use their Auth Username), or dial "asteriskTest" to test calling an IVR system.
+
+Behind the scenes, your credentials are verified against a smart contract on Oasis Sapphire (confidential EVM), and your ENS identity is resolved on the Hoodi network. This demonstrates blockchain-based SIP authentication with full ENS support.
+
+The auth_web3 module is compatible with both Kamailio and OpenSIPS.
+
+Questions? Email ron@cellact.nl`
     };
     
     await transporter.sendMail(mailOptions);

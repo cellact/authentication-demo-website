@@ -219,7 +219,7 @@ function saveUsersToStorage() {
 }
 
 async function handleClearAllData() {
-  if (!confirm('WARNING: This will DELETE ALL users from the blockchain and clear all local data. Are you sure?')) {
+  if (!confirm('WARNING: This will DELETE ALL users from the Oasis Sapphire contract and clear all local data. Are you sure?')) {
     return;
   }
 
@@ -238,12 +238,12 @@ async function handleClearAllData() {
       return;
     }
 
-    console.log(`🗑️  Deleting ${usersToDelete.length} users from blockchain...`);
+    console.log(`🗑️  Deleting ${usersToDelete.length} users from Oasis Sapphire contract...`);
     
     let successCount = 0;
     let failCount = 0;
     
-    // Delete each user from the blockchain
+    // Delete each user from the Oasis Sapphire contract
     for (let i = 0; i < usersToDelete.length; i++) {
       const user = usersToDelete[i];
       btnClearAll.textContent = `Deleting ${i + 1}/${usersToDelete.length}...`;
@@ -287,7 +287,7 @@ async function handleClearAllData() {
     
     // Show result to user
     if (failCount === 0) {
-      alert(`All ${successCount} users deleted successfully from blockchain!\n\nLocal data cleared. Page will reload.`);
+      alert(`All ${successCount} users deleted successfully from Oasis Sapphire!\n\nLocal data cleared. Page will reload.`);
     } else {
       alert(`WARNING: Deleted ${successCount} users successfully.\n${failCount} failed to delete.\n\nLocal data cleared anyway. Page will reload.`);
     }
@@ -580,7 +580,7 @@ function resetCreationStatus() {
 }
 
 async function handleDeleteUser(authUsername) {
-  if (!confirm(`Delete ${authUsername}? This will remove the user from Oasis blockchain.`)) {
+  if (!confirm(`Delete ${authUsername}? This will remove the user from the Oasis Sapphire contract.`)) {
     return;
   }
   

@@ -11,8 +11,8 @@
     <!-- Auth Gate (shown when not logged in) -->
     <div id="auth-gate" style="display: none;">
       <div class="auth-container">
-        <h1>Authentication Demo</h1>
-        <p>Create a free non-custodial wallet with ENS identity</p>
+        <h1>SIP Web3 Authentication Demo</h1>
+        <p>Demonstrating blockchain-based SIP authentication with auth_web3 module</p>
         
         <!-- Message container for auth gate -->
         <div id="auth-message" class="auth-message" style="display: none;"></div>
@@ -35,7 +35,7 @@
     <!-- Main App (shown when logged in) -->
     <div id="main-app" style="display: none;">
       <header>
-        <h1>Authentication Demo</h1>
+        <h1>SIP Web3 Authentication Demo</h1>
         <div class="header-actions">
           <span id="user-email" class="user-email"></span>
           <button id="btn-signout" class="btn-secondary">Sign Out</button>
@@ -53,7 +53,9 @@
         
         <!-- SIP Instructions -->
         <div class="sip-instructions">
-          <p><strong>How to use:</strong> Copy your credentials into a SIP client with domain <code>kama6.cellact.nl</code> to register and make calls over UDP.</p>
+          <p><strong>About:</strong> These accounts authenticate via the <code>auth_web3</code> module on Kamailio/OpenSIPS. Credentials are verified against a smart contract on Oasis Sapphire, with ENS resolution on Hoodi network.</p>
+          <p><strong>How to use:</strong> Copy your credentials into any SIP client with domain <code>kama6.cellact.nl</code> (UDP) to test blockchain-based authentication.</p>
+          <p><strong>Extra:</strong> You can test calling to an IVR by dialing <code>asteriskTest</code></p>
         </div>
         
         <div id="user-list-container">
@@ -76,6 +78,7 @@
             <div>
               <label>Choose a password</label>
               <input type="text" id="password" name="password" required placeholder="Enter a password">
+              <small class="username-note">Account details will be sent to your Gmail</small>
             </div>
             
             <!-- Loading status indicator -->
@@ -83,7 +86,7 @@
               <div class="spinner"></div>
               <div class="status-text">
                 <p><strong>Creating your account...</strong></p>
-                <p>We're creating a non-custodial wallet and registering an ENS identity to it. This may take a minute.</p>
+                <p>Storing credentials on Oasis Sapphire and registering ENS identity on Hoodi. This may take a minute.</p>
               </div>
             </div>
             
