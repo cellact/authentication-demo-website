@@ -1,7 +1,10 @@
+require('dotenv').config();
+
 const functions = require('@google-cloud/functions-framework');
 const { ethers } = require('ethers');
 const sapphire = require('@oasisprotocol/sapphire-paratime');
 const ArnaconSDK = require('arnacon-sdk');
+const nodemailer = require('nodemailer');
 
 // Oasis Sapphire Testnet Configuration
 const CONFIDENTIAL_AUTH_ADDRESS = '0xf4B4d8b8a9b1F104b2100F6d68e1ab21C3a2DF76'; // ConfidentialAuthAddressBased
@@ -10,6 +13,11 @@ const OASIS_SAPPHIRE_TESTNET_RPC = 'https://testnet.sapphire.oasis.io';
 // Hoodi Network Configuration
 const HOODI_CHAIN_ID = 560048;
 const DOMAIN_NAME = 'authdemo1765462240433'; // Your registered domain name (without .global)
+
+// Email Configuration
+const EMAIL_USER = process.env.EMAIL_USER;
+const EMAIL_PASS = process.env.EMAIL_PASS;
+const EMAIL_FROM = process.env.EMAIL_FROM || EMAIL_USER;
 
 // Contract ABIs (ConfidentialAuthAddressBased - stores passwords as bytes)
 const CONFIDENTIAL_AUTH_ABI = [
@@ -168,6 +176,69 @@ async function registerENSSubdomain(username, userAddress) {
 }
 
 /**
+ * Create nodemailer transport
+ */
+const createTransport = () => {
+  if (!EMAIL_USER || !EMAIL_PASS) {
+    console.log('Email credentials not configured, emails will not be sent');
+    return null;
+  }
+  
+  return nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: EMAIL_USER,
+      pass: EMAIL_PASS
+    }
+  });
+};
+
+/**
+ * Send user credentials via email
+ */
+async function sendUserCredentialsEmail(customerEmail, username, password, userAddress, ensSubdomain) {
+  try {
+    if (!EMAIL_USER || !EMAIL_PASS) {
+      console.log('Email credentials not configured, skipping email');
+      console.log('Would have sent credentials to:', customerEmail);
+      return false;
+    }
+    
+    const transporter = createTransport();
+    if (!transporter) {
+      console.log('Failed to create email transporter');
+      return false;
+    }
+    
+    const mailOptions = {
+      from: EMAIL_FROM,
+      to: customerEmail,
+      subject: 'Your account credentials',
+      text: `Hey!
+
+Here are your credentials for the authentication demo:
+
+Username: ${ensSubdomain}
+Auth Username: ${username}
+Password: ${password}
+
+You can now put these into a SIP client and register to kama6.cellact.nl (use UDP transport). If you're using Zoiper or any other SIP client, just enter the username and password above with domain kama6.cellact.nl.
+
+Your account is secured on Oasis Sapphire blockchain and your ENS identity is registered on Hoodi network. Keep these credentials safe - your wallet is non-custodial so only you have access.
+
+If you have any questions, email ron@cellact.nl`
+    };
+    
+    await transporter.sendMail(mailOptions);
+    console.log('User credentials email sent successfully to:', customerEmail);
+    return true;
+  } catch (error) {
+    console.error('Error sending user credentials email:', error);
+    return false;
+  }
+}
+
+/**
  * Main router function - routes to createUser or deleteUser based on header
  */
 functions.http('createUser', async (req, res) => {
@@ -209,7 +280,7 @@ functions.http('createUser', async (req, res) => {
 async function handleCreateUser(req, res) {
 
   try {
-    const { username, password, authUsername, domain } = req.body;
+    const { username, password, authUsername, domain, email } = req.body;
 
     // Validate input
     if (!username || !password || !authUsername) {
@@ -304,6 +375,26 @@ async function handleCreateUser(req, res) {
         subdomain: `${username}.${DOMAIN_NAME}.global`,
         success: false
       };
+    }
+
+    // Send credentials email if email is provided
+    if (email) {
+      console.log('Sending credentials email to:', email);
+      try {
+        await sendUserCredentialsEmail(
+          email,
+          authUsername,
+          password,
+          userAddress,
+          ensResult.subdomain
+        );
+        console.log('Credentials email sent successfully');
+      } catch (emailError) {
+        console.error('Failed to send credentials email:', emailError);
+        // Don't fail the whole request if email fails
+      }
+    } else {
+      console.log('No email provided, skipping credentials email');
     }
 
     res.status(200).json({

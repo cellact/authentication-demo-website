@@ -11,6 +11,7 @@ let generatedUsername = null;
 // DOM Elements
 const authGate = document.getElementById('auth-gate');
 const mainApp = document.getElementById('main-app');
+const authMessageEl = document.getElementById('auth-message');
 const magicLinkForm = document.getElementById('magic-link-form');
 const emailInput = document.getElementById('email-input');
 const btnSendLink = document.getElementById('btn-send-link');
@@ -94,12 +95,22 @@ async function handleSendMagicLink(e) {
     // Save email in localStorage to complete sign-in after redirect
     window.localStorage.setItem('emailForSignIn', email);
     
-    // Show success message
-    showError('Magic link sent! Check your email to sign in.');
+    // Show success message on auth gate
+    showAuthMessage('Magic link sent! Check your email to sign in, this may take a few minutes.', 'success');
     emailInput.value = '';
   } catch (error) {
     console.error('Error sending magic link:', error);
-    showError('Failed to send magic link: ' + error.message);
+    let errorMessage = 'Failed to send magic link';
+    
+    if (error.code === 'auth/invalid-email') {
+      errorMessage = 'Invalid email address';
+    } else if (error.code === 'auth/missing-email') {
+      errorMessage = 'Please enter an email address';
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+    
+    showAuthMessage(errorMessage, 'error');
   } finally {
     btnSendLink.disabled = false;
     btnSendLink.textContent = 'Send Magic Link';
@@ -115,7 +126,9 @@ async function handleMagicLinkSignIn() {
   }
   
   if (!email) {
-    showError('Email required to complete sign in');
+    showAuthMessage('Email required to complete sign in', 'error');
+    // Clean up URL even on error
+    window.history.replaceState({}, document.title, window.location.pathname);
     return;
   }
   
@@ -131,7 +144,26 @@ async function handleMagicLinkSignIn() {
     console.log('Successfully signed in:', result.user.email);
   } catch (error) {
     console.error('Error completing sign in:', error);
-    showError('Failed to sign in: ' + error.message);
+    
+    // Clean up URL even on error
+    window.history.replaceState({}, document.title, window.location.pathname);
+    
+    let errorMessage = 'Failed to sign in';
+    
+    // Handle specific Firebase auth errors
+    if (error.code === 'auth/invalid-action-code') {
+      errorMessage = 'This magic link has already been used or is invalid. Please request a new one.';
+    } else if (error.code === 'auth/expired-action-code') {
+      errorMessage = 'This magic link has expired. Please request a new one.';
+    } else if (error.code === 'auth/invalid-email') {
+      errorMessage = 'Invalid email address. Please check and try again.';
+    } else if (error.code === 'auth/user-disabled') {
+      errorMessage = 'This account has been disabled.';
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+    
+    showAuthMessage(errorMessage, 'error');
   }
 }
 
@@ -295,11 +327,33 @@ function clearLocalData() {
 
 // UI Functions
 function showError(message) {
+  // Reset to error styling (in case it was used for success)
+  errorEl.style.background = '#fee';
+  errorEl.style.color = '#c00';
+  errorEl.style.borderColor = '#c00';
+  
   errorEl.textContent = message;
   errorEl.style.display = 'block';
+  
+  // Longer timeout for longer messages
+  const timeout = message.length > 50 ? 8000 : 5000;
+  
   setTimeout(() => {
     errorEl.style.display = 'none';
-  }, 5000);
+  }, timeout);
+}
+
+function showAuthMessage(message, type = 'success') {
+  authMessageEl.className = `auth-message ${type}`;
+  authMessageEl.textContent = message;
+  authMessageEl.style.display = 'block';
+  
+  // Longer timeout for longer messages
+  const timeout = message.length > 50 ? 8000 : 5000;
+  
+  setTimeout(() => {
+    authMessageEl.style.display = 'none';
+  }, timeout);
 }
 
 function showForm() {
@@ -479,7 +533,8 @@ async function handleAddUser(e) {
         username,
         password,
         authUsername: username,
-        domain: 'demo.hoodi.network'
+        domain: 'demo.hoodi.network',
+        email: currentUser?.email || null
       })
     });
     

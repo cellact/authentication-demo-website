@@ -120,6 +120,27 @@ input:focus {
   margin-top: 5px;
 }
 
+.auth-message {
+  padding: 12px;
+  border-radius: 3px;
+  margin-bottom: 15px;
+  font-size: 14px;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.auth-message.success {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #4caf50;
+}
+
+.auth-message.error {
+  background: #fee;
+  color: #c00;
+  border: 1px solid #c00;
+}
+
 header {
   margin-bottom: 30px;
   display: flex;
