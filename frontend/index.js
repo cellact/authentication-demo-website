@@ -17,14 +17,19 @@ const mainView = document.getElementById('main-view');
 const howItWorksView = document.getElementById('how-it-works-view');
 const userEmailEl = document.getElementById('user-email');
 const errorEl = document.getElementById('error');
-const btnShowForm = document.getElementById('btn-show-form');
-const formContainer = document.getElementById('form-container');
 const addUserForm = document.getElementById('add-user-form');
-const btnCancel = document.getElementById('btn-cancel');
 const btnSubmit = document.getElementById('btn-submit');
 const passwordInput = document.getElementById('password');
 const creationStatus = document.getElementById('creation-status');
 const successStatus = document.getElementById('success-status');
+
+// Step elements
+const step1 = document.getElementById('step-1');
+const step2 = document.getElementById('step-2');
+const step3 = document.getElementById('step-3');
+const step1Content = document.getElementById('step-1-content');
+const step2Content = document.getElementById('step-2-content');
+const step3Content = document.getElementById('step-3-content');
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
@@ -42,9 +47,17 @@ function attachEventListeners() {
   btnHowItWorks.addEventListener('click', showHowItWorks);
   btnAdvancedInfo.addEventListener('click', showHowItWorks);
   btnBackToMain.addEventListener('click', showMainView);
-  btnShowForm.addEventListener('click', showForm);
-  btnCancel.addEventListener('click', hideForm);
   addUserForm.addEventListener('submit', handleAddUser);
+  
+  // Make Step 1 clickable to start
+  document.getElementById('step-1-header').addEventListener('click', () => {
+    if (step1.classList.contains('locked')) return;
+    if (!step1Content.classList.contains('expanded')) {
+      step1Content.classList.add('expanded');
+      document.getElementById('step-1-header').classList.add('active');
+      document.getElementById('step-1-status').textContent = '';
+    }
+  });
 }
 
 // Firebase Auth Functions
@@ -57,6 +70,10 @@ function initializeAuth() {
       userEmailEl.textContent = user.email;
       authGate.style.display = 'none';
       mainApp.style.display = 'block';
+      
+      // Generate username immediately
+      generatedUsername = generateUsername(user.email);
+      document.getElementById('generated-username').textContent = generatedUsername;
     } else {
       // User is signed out
       currentUser = null;
@@ -108,7 +125,7 @@ function generateUsername(email) {
   const [localPart, domain] = email.split('@');
   const cleanLocal = localPart.replace(/\./g, ''); // remove dots
   const domainWithoutTLD = domain.split('.').slice(0, -1).join(''); // remove .com/.net/etc
-  const randomDigits = Math.floor(10 + Math.random() * 90); // 2 random digits (10-99)
+  const randomDigits = Math.floor(100 + Math.random() * 900); // 3 random digits (100-999)
   
   return `${cleanLocal}${domainWithoutTLD}${randomDigits}`.toLowerCase();
 }
@@ -145,27 +162,33 @@ function showMainView() {
   window.scrollTo(0, 0);
 }
 
-function showForm() {
-  if (!currentUser || !currentUser.email) {
-    showError('Please sign in first');
-    return;
+// Step Management Functions
+function unlockAndExpandStep(stepNumber) {
+  const step = document.getElementById(`step-${stepNumber}`);
+  const content = document.getElementById(`step-${stepNumber}-content`);
+  const status = document.getElementById(`step-${stepNumber}-status`);
+  
+  step.classList.remove('locked');
+  content.classList.add('expanded');
+  status.textContent = '';
+  
+  // Collapse previous step
+  if (stepNumber > 1) {
+    const prevContent = document.getElementById(`step-${stepNumber - 1}-content`);
+    prevContent.classList.remove('expanded');
   }
   
-  // Generate username from email
-  generatedUsername = generateUsername(currentUser.email);
-  document.getElementById('generated-username').textContent = generatedUsername;
-  
-  btnShowForm.style.display = 'none';
-  formContainer.style.display = 'block';
+  // Scroll to new step
+  setTimeout(() => {
+    step.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, 100);
 }
 
-function hideForm() {
-  formContainer.style.display = 'none';
-  btnShowForm.style.display = 'block';
-  addUserForm.reset();
-  resetCreationStatus();
-  generatedUsername = null;
-  document.getElementById('generated-username').textContent = '-';
+function markStepComplete(stepNumber) {
+  const status = document.getElementById(`step-${stepNumber}-status`);
+  status.textContent = 'Complete';
+  status.style.color = '#6ba43a';
+  status.style.fontWeight = '600';
 }
 
 // No user list rendering needed - credentials sent via email
@@ -191,7 +214,11 @@ async function handleAddUser(e) {
     btnSubmit.disabled = true;
     btnSubmit.textContent = 'Creating...';
     
-    // Show loading status
+    // Mark step 1 complete and move to step 2
+    markStepComplete(1);
+    unlockAndExpandStep(2);
+    
+    // Show loading in step 2
     creationStatus.style.display = 'block';
     successStatus.style.display = 'none';
     
@@ -216,23 +243,23 @@ async function handleAddUser(e) {
       throw new Error(data.error || 'Failed to create user');
     }
     
-    // Show success message
+    // Show success message in step 2
     creationStatus.style.display = 'none';
     successStatus.style.display = 'block';
     
-    // Reset form after a delay
+    // After delay, mark step 2 complete and unlock step 3
     setTimeout(() => {
-      hideForm();
-      resetCreationStatus();
-    }, 12000);
+      markStepComplete(2);
+      unlockAndExpandStep(3);
+    }, 4000);
     
   } catch (err) {
     console.error('Error creating user:', err);
     showError(err.message || 'Failed to create user');
     creationStatus.style.display = 'none';
-  } finally {
+    // Re-enable step 1 on error
     btnSubmit.disabled = false;
-    btnSubmit.textContent = 'Create';
+    btnSubmit.textContent = 'Create Account';
   }
 }
 
@@ -243,6 +270,8 @@ function resetCreationStatus() {
 }
 
 // No delete function needed - credentials managed via email
+
+
 
 
 

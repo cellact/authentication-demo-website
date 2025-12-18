@@ -46,26 +46,69 @@
       <!-- Error message -->
       <div id="error" class="error" style="display: none;"></div>
 
-      <!-- Add User Panel -->
-      <div class="panel small">
-        <button id="btn-show-form" class="btn-create">Create New Account</button>
-        
-        <div id="form-container" style="display: none;">
-          <h3>New Account</h3>
-          <form id="add-user-form" class="form">
-            <div class="username-display">
-              <label>Your username will be:</label>
-              <div class="generated-username" id="generated-username">-</div>
-              <small class="username-note">Generated from your Google email</small>
+      <!-- Progressive Steps Panel -->
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Create Your Account</h2>
+          <button id="btn-advanced-info" class="btn-info">Advanced Info</button>
+        </div>
+
+        <!-- Introduction Text -->
+        <div class="step-intro">
+          <p><strong>What you will do?</strong> Create credentials for a SIP account that will be able to authenticate using the <code>auth_web3</code> module.</p>
+          <p>You'll receive an <strong>Username</strong>, <strong>Auth Username</strong>, and <strong>Password</strong> via Gmail. Use these to register to <code>kama6.cellact.nl</code> (UDP transport) on any SIP client. Once registered, call other users or dial <code>asteriskTest</code> which is our IVR.</p>
+        </div>
+
+        <!-- Step 1: Your Credentials -->
+        <div class="accordion-step" id="step-1" data-step="1">
+          <div class="accordion-header" id="step-1-header">
+            <div class="accordion-header-left">
+              <div class="step-number">1</div>
+              <h3>Your Credentials</h3>
             </div>
-            <div>
-              <label>Choose a password</label>
-              <input type="text" id="password" name="password" required placeholder="Enter a password">
-              <small class="username-note">Account details will be sent to your Gmail</small>
+            <div class="step-status" id="step-1-status">Click to start</div>
+          </div>
+          <div class="accordion-content" id="step-1-content">
+            <form id="add-user-form" class="form">
+              <div class="username-display">
+                <label>Your username will be:</label>
+                <div class="generated-username" id="generated-username">-</div>
+                <small class="username-note">Generated from your Google email</small>
+              </div>
+              <div>
+                <label>Choose a password</label>
+                <input type="text" id="password" name="password" required placeholder="Enter a password">
+                <small class="username-note">Account details will be sent to your Gmail</small>
+              </div>
+              
+              <div class="credentials-explanation">
+                <p><strong>You will receive via email:</strong></p>
+                <ul>
+                  <li><strong>Auth Username:</strong> Stored with your password on Oasis Sapphire, mapped to a blockchain wallet</li>
+                  <li><strong>Password:</strong> Your chosen password</li>
+                  <li><strong>Username/Display Name:</strong> An ENS subdomain (e.g., <code>yourname.authdemo1765462240433.global</code>) owned by the blockchain wallet mapped to your auth username</li>
+                </ul>
+              </div>
+              
+              <div class="form-actions">
+                <button type="submit" id="btn-submit" class="btn-create">Create Account</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Step 2: Getting Your Credentials -->
+        <div class="accordion-step locked" id="step-2" data-step="2">
+          <div class="accordion-header" id="step-2-header">
+            <div class="accordion-header-left">
+              <div class="step-number">2</div>
+              <h3>Getting Your Credentials</h3>
             </div>
-            
+            <div class="step-status" id="step-2-status">Locked</div>
+          </div>
+          <div class="accordion-content" id="step-2-content">
             <!-- Loading status indicator -->
-            <div id="creation-status" class="creation-status" style="display: none;">
+            <div id="creation-status" class="creation-status">
               <div class="spinner"></div>
               <div class="status-text">
                 <p><strong>Creating your account...</strong></p>
@@ -75,69 +118,31 @@
             
             <!-- Success message -->
             <div id="success-status" class="success-status" style="display: none;">
-              <div class="success-icon">✓</div>
+              <div class="success-icon">Done</div>
               <div class="status-text">
                 <p><strong>Account created successfully!</strong></p>
                 <p>Your credentials have been sent to your Gmail. Check your inbox for the full details.</p>
               </div>
             </div>
-            
-            <div class="form-actions">
-              <button type="submit" id="btn-submit">Create</button>
-              <button type="button" id="btn-cancel">Cancel</button>
-            </div>
-          </form>
+          </div>
         </div>
-      </div>
 
-      <!-- Instructions Panel -->
-      <div class="panel">
-        <div class="panel-header">
-          <h2>How to Get Started</h2>
-          <button id="btn-advanced-info" class="btn-info">Advanced Info</button>
-        </div>
-        
-        <div class="steps-container">
-          <div class="step">
-            <div class="step-number">1</div>
-            <div class="step-content">
-              <h3>Choose Your Password</h3>
-              <p>Your username will be automatically generated based on your Gmail address.</p>
+        <!-- Step 3: Using Your Credentials -->
+        <div class="accordion-step locked" id="step-3" data-step="3">
+          <div class="accordion-header" id="step-3-header">
+            <div class="accordion-header-left">
+              <div class="step-number">3</div>
+              <h3>Using Your Credentials</h3>
             </div>
+            <div class="step-status" id="step-3-status">Locked</div>
           </div>
-
-          <div class="step">
-            <div class="step-number">2</div>
-            <div class="step-content">
-              <h3>Create Account & Wait for Email</h3>
-              <p>Click "Create New Account" below and wait for your credentials to arrive in your Gmail inbox. This may take a minute as we store your credentials on Oasis Sapphire blockchain and register your ENS identity on Hoodi network.</p>
-            </div>
-          </div>
-
-          <div class="step">
-            <div class="step-number">3</div>
-            <div class="step-content">
-              <h3>Your Credentials</h3>
-              <p>You will receive via email:</p>
-              <ul>
-                <li><strong>Auth Username:</strong> Stored with your password on Oasis Sapphire, mapped to a blockchain wallet</li>
-                <li><strong>Password:</strong> Your chosen password</li>
-                <li><strong>Username/Display Name:</strong> An ENS subdomain (e.g., <code>yourname.authdemo1765462240433.global</code>) owned by the blockchain wallet mapped to your auth username</li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="step">
-            <div class="step-number">4</div>
-            <div class="step-content">
-              <h3>Use Your Credentials</h3>
-              <p>Register to <code>kama6.cellact.nl</code> with <strong>UDP transport</strong> on any SIP client using your credentials.</p>
-              <p><strong>What you can do:</strong></p>
-              <ul>
-                <li>Call any other registered user</li>
-                <li>Call our IVR at <code>asteriskTest</code> if you only have one device</li>
-              </ul>
-            </div>
+          <div class="accordion-content" id="step-3-content">
+            <p>Register to <code>kama6.cellact.nl</code> with <strong>UDP transport</strong> on any SIP client using your credentials.</p>
+            <p><strong>What you can do:</strong></p>
+            <ul>
+              <li>Call any other registered user</li>
+              <li>Call our IVR at <code>asteriskTest</code> if you only have one device</li>
+            </ul>
           </div>
         </div>
       </div>
