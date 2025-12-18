@@ -1,67 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Authentication Demo</title>
+  <title>SIP auth_web3 Module Demo</title>
   <link rel="stylesheet" href="styles.css">
-</head>
-<body>
+  </head>
+  <body>
   <div class="app" id="app">
     <!-- Auth Gate (shown when not logged in) -->
     <div id="auth-gate" style="display: none;">
       <div class="auth-container">
-        <h1>SIP Web3 Authentication Demo</h1>
-        <p>Demonstrating blockchain-based SIP authentication with auth_web3 module</p>
+        <h1>SIP auth_web3 Module Demo</h1>
+        <p>Demonstrating blockchain-based SIP authentication with <code>auth_web3</code> module</p>
         
-        <!-- Message container for auth gate -->
-        <div id="auth-message" class="auth-message" style="display: none;"></div>
-        
-        <form id="magic-link-form" class="magic-link-form">
-          <input 
-            type="email" 
-            id="email-input" 
-            placeholder="Enter your email" 
-            required
-          />
-          <button type="submit" id="btn-send-link" class="btn-primary">
-            Send Magic Link
-          </button>
-        </form>
-        <p class="magic-link-note">We'll send you a link to sign in securely</p>
+        <button id="btn-google-signin" class="btn-google">
+          <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+            <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+            <path fill="none" d="M0 0h48v48H0z"/>
+          </svg>
+          Sign in with Google
+        </button>
+        <p class="auth-note">Your credentials will be based on your Gmail, therefore we require you log in.</p>
       </div>
     </div>
 
     <!-- Main App (shown when logged in) -->
     <div id="main-app" style="display: none;">
       <header>
-        <h1>SIP Web3 Authentication Demo</h1>
+        <div class="header-left">
+          <h1>SIP auth_web3 Module Demo</h1>
+          <p class="header-subtitle">Blockchain-based SIP authentication via <code>auth_web3</code> module</p>
+        </div>
         <div class="header-actions">
+          <button id="btn-how-it-works" class="btn-info-header">How It Works</button>
           <span id="user-email" class="user-email"></span>
           <button id="btn-signout" class="btn-secondary">Sign Out</button>
-          <button id="btn-clear-all" class="btn-danger" title="Clear all local data">Clear All Data</button>
         </div>
       </header>
 
-    <main>
+    <main id="main-view">
       <!-- Error message -->
       <div id="error" class="error" style="display: none;"></div>
-
-      <!-- User List Panel -->
-      <div class="panel">
-        <h2>Your Accounts</h2>
-        
-        <!-- SIP Instructions -->
-        <div class="sip-instructions">
-          <p><strong>About:</strong> These accounts authenticate via the <code>auth_web3</code> module on Kamailio/OpenSIPS. Credentials are verified against a smart contract on Oasis Sapphire, with ENS resolution on Hoodi network.</p>
-          <p><strong>How to use:</strong> Copy your credentials into any SIP client with domain <code>kama6.cellact.nl</code> (UDP) to test blockchain-based authentication.</p>
-          <p><strong>Extra:</strong> You can test calling to an IVR by dialing <code>asteriskTest</code></p>
-        </div>
-        
-        <div id="user-list-container">
-          <div class="loading">Loading...</div>
-        </div>
-      </div>
 
       <!-- Add User Panel -->
       <div class="panel small">
@@ -86,7 +69,16 @@
               <div class="spinner"></div>
               <div class="status-text">
                 <p><strong>Creating your account...</strong></p>
-                <p>Storing credentials on Oasis Sapphire and registering ENS identity on Hoodi. This may take a minute.</p>
+                <p>Storing credentials on Oasis Sapphire and registering ENS identity on Hoodi. Your credentials will be sent to your Gmail shortly.</p>
+              </div>
+            </div>
+            
+            <!-- Success message -->
+            <div id="success-status" class="success-status" style="display: none;">
+              <div class="success-icon">✓</div>
+              <div class="status-text">
+                <p><strong>Account created successfully!</strong></p>
+                <p>Your credentials have been sent to your Gmail. Check your inbox for the full details.</p>
               </div>
             </div>
             
@@ -97,14 +89,159 @@
           </form>
         </div>
       </div>
+
+      <!-- Instructions Panel -->
+      <div class="panel">
+        <div class="panel-header">
+          <h2>How to Get Started</h2>
+          <button id="btn-advanced-info" class="btn-info">Advanced Info</button>
+        </div>
+        
+        <div class="steps-container">
+          <div class="step">
+            <div class="step-number">1</div>
+            <div class="step-content">
+              <h3>Choose Your Password</h3>
+              <p>Your username will be automatically generated based on your Gmail address.</p>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-number">2</div>
+            <div class="step-content">
+              <h3>Create Account & Wait for Email</h3>
+              <p>Click "Create New Account" below and wait for your credentials to arrive in your Gmail inbox. This may take a minute as we store your credentials on Oasis Sapphire blockchain and register your ENS identity on Hoodi network.</p>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-number">3</div>
+            <div class="step-content">
+              <h3>Your Credentials</h3>
+              <p>You will receive via email:</p>
+              <ul>
+                <li><strong>Auth Username:</strong> Stored with your password on Oasis Sapphire, mapped to a blockchain wallet</li>
+                <li><strong>Password:</strong> Your chosen password</li>
+                <li><strong>Username/Display Name:</strong> An ENS subdomain (e.g., <code>yourname.authdemo1765462240433.global</code>) owned by the blockchain wallet mapped to your auth username</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-number">4</div>
+            <div class="step-content">
+              <h3>Use Your Credentials</h3>
+              <p>Register to <code>kama6.cellact.nl</code> with <strong>UDP transport</strong> on any SIP client using your credentials.</p>
+              <p><strong>What you can do:</strong></p>
+              <ul>
+                <li>Call any other registered user</li>
+                <li>Call our IVR at <code>asteriskTest</code> if you only have one device</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
     </main>
+
+    <!-- How It Works Page -->
+    <main id="how-it-works-view" style="display: none;">
+      <div class="panel">
+        <div class="back-button-container">
+          <button id="btn-back-to-main" class="btn-secondary">← Back to Main</button>
+        </div>
+        <h2>How It Works - Implementation Guide</h2>
+        
+        <h3>What's Happening Behind the Scenes</h3>
+        <p>When you create an account:</p>
+        <ul>
+          <li>Your credentials are stored in a <strong>confidential smart contract</strong> on Oasis Sapphire (an EVM blockchain with built-in encryption)</li>
+          <li>An <strong>ENS identity</strong> is registered on the Hoodi network, linking your username to a wallet address</li>
+          <li>When you authenticate via SIP, the Kamailio server queries these blockchain contracts to verify your credentials</li>
+        </ul>
+
+        <h3>How to Use This in Your Own Kamailio Setup</h3>
+        
+        <h4>1. Load the auth_web3 module:</h4>
+        <pre><code>loadmodule "auth_web3.so"</code></pre>
+
+        <h4>2. Configure module parameters:</h4>
+        <pre><code># Point to your authentication contract on Oasis Sapphire
+modparam("auth_web3", "authentication_contract_address", "0xYourContractAddress")
+modparam("auth_web3", "authentication_rpc_url", "https://testnet.sapphire.oasis.dev")
+
+# Optional: Enable ENS resolution on Hoodi (or any ENS-compatible network)
+modparam("auth_web3", "ens_rpc_url", "https://rpc.hoodi.ethpandaops.io")
+modparam("auth_web3", "ens_registry_address", "0x5841d17010252BE760D055cba2f2853874457443")
+
+# Adjust timeout for blockchain queries
+modparam("auth_web3", "rpc_timeout", 40)</code></pre>
+
+        <h4>3. Use in your routing logic:</h4>
+        <pre><code>route[AUTH] {
+    if (is_method("REGISTER")) {
+        # Drop retransmissions
+        if (!t_newtran()) {
+            sl_reply_error();
+            exit;
+        }
+        
+        # Authenticate via blockchain
+        if (!web3_www_authenticate("$fd", "$rm")) {
+            auth_challenge("$fd", "0");
+            exit;
+        }
+        
+        # Save location and continue
+        save("location");
+    }
+    
+    if (is_method("INVITE")) {
+        # Drop retransmissions
+        if (!t_newtran()) {
+            sl_reply_error();
+            exit;
+        }
+        
+        # Proxy authenticate
+        if (!web3_proxy_authenticate("$fd", "$rm")) {
+            proxy_challenge("$fd", "0");
+            exit;
+        }
+    }
+}</code></pre>
+
+        <h4>4. Deploy your smart contract:</h4>
+        <p>Your authentication contract must implement:</p>
+        <pre><code>function authenticateUser(
+    string memory username,
+    string memory realm,
+    string memory method,
+    string memory uri,
+    string memory nonce,
+    uint8 algorithm,
+    bytes memory response
+) public view returns (bool);
+
+function getWalletAddress(
+    string memory username
+) public view returns (address);</code></pre>
+
+        <h3>Resources</h3>
+        <ul>
+          <li><strong>Module:</strong> auth_web3 (compatible with Kamailio and OpenSIPS)</li>
+          <li><strong>Authentication Network:</strong> Oasis Sapphire (confidential EVM)</li>
+          <li><strong>ENS Network:</strong> Any ENS-compatible chain (Ethereum, Hoodi, etc.)</li>
+          <li><strong>Demo Contract:</strong> 0xf4B4d8b8a9b1F104b2100F6d68e1ab21C3a2DF76 (Oasis Sapphire Testnet)</li>
+        </ul>
+      </div>
+    </main>
+
     </div>
-  </div>
 
   <!-- Firebase SDK -->
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-    import { getAuth, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 
     const firebaseConfig = {
       apiKey: "AIzaSyDJYM5wA-mzzap1OeVYxig0ZQTzFs2FqNo",
@@ -118,15 +255,15 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
+    const googleProvider = new GoogleAuthProvider();
 
     // Make auth available globally
     window.firebaseAuth = auth;
-    window.sendSignInLinkToEmail = sendSignInLinkToEmail;
-    window.isSignInWithEmailLink = isSignInWithEmailLink;
-    window.signInWithEmailLink = signInWithEmailLink;
+    window.googleProvider = googleProvider;
+    window.signInWithPopup = signInWithPopup;
     window.signOut = signOut;
     window.onAuthStateChanged = onAuthStateChanged;
   </script>
   <script src="index.js"></script>
-</body>
+  </body>
 </html>
