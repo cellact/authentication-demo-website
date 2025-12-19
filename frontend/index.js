@@ -1,5 +1,5 @@
 // Configuration
-const API_URL = 'http://localhost:8080'; // Local backend (change to GCP function URL when deployed)
+const API_URL = 'https://demo-website-backend-309305771885.us-central1.run.app';
 
 // State
 let currentUser = null; // Firebase user

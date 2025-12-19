@@ -78,9 +78,9 @@ async function registerENSSubdomain(username, userAddress) {
   // Get the SecondLevelInteractor contract address for this domain owner
   const secondLevelInteractorAddress = '0x5bA6D4749AE9573f703E19f9197AE783dFaa78f8'; // From hoodi-addresses.json
   
-  // Load SecondLevelInteractor ABI from SDK artifacts
-  const { artifacts } = require('arnacon-sdk/dist/artifacts');
-  const secondLevelInteractorAbi = artifacts.SecondLevelInteractor.abi;
+  // Load ABIs from local artifact files
+  const secondLevelInteractorArtifact = require('./SecondLevelInteractor.json');
+  const secondLevelInteractorAbi = secondLevelInteractorArtifact.abi;
   
   console.log(`Loaded ABI with ${secondLevelInteractorAbi.length} functions`);
   
@@ -125,7 +125,8 @@ async function registerENSSubdomain(username, userAddress) {
   // Step 2: Set the address record on PublicResolver (pointing to Oasis wallet)
   console.log(`\nSetting address record on PublicResolver...`);
   const publicResolverAddress = '0x9427fF61d53deDB42102d84E0EC2927F910eF8f2';
-  const publicResolverAbi = artifacts.PublicResolver.abi;
+  const publicResolverArtifact = require('./PublicResolver.json');
+  const publicResolverAbi = publicResolverArtifact.abi;
   
   const publicResolver = new ethers.Contract(
     publicResolverAddress,
@@ -146,7 +147,8 @@ async function registerENSSubdomain(username, userAddress) {
   // Step 3: Transfer subdomain NFT ownership to Oasis wallet
   console.log(`\nTransferring subdomain ownership to Oasis wallet...`);
   const nameWrapperAddress = '0x0140420b3e02b1A7d4645cE330337bc8742C3Df5';
-  const nameWrapperAbi = artifacts.NameWrapper.abi;
+  const nameWrapperArtifact = require('./NameWrapper.json');
+  const nameWrapperAbi = nameWrapperArtifact.abi;
   
   const nameWrapper = new ethers.Contract(
     nameWrapperAddress,
@@ -251,7 +253,7 @@ Questions? Email ron@cellact.nl`
 /**
  * Main router function - routes to createUser or deleteUser based on header
  */
-functions.http('createUser', async (req, res) => {
+functions.http('helloHttp', async (req, res) => {
   // CORS headers
   res.set('Access-Control-Allow-Origin', '*');
   res.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
