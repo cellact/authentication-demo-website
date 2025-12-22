@@ -111,7 +111,7 @@ https://github.com/kamailio/kamailio/tree/master/src/modules/auth_web3
 
 - **Authentication Contract** (Oasis Sapphire Testnet): `0xf4B4d8b8a9b1F104b2100F6d68e1ab21C3a2DF76`
 - **ENS Registry** (Hoodi): `0x5841d17010252BE760D055cba2f2853874457443`
-- **Domain**: `authdemo1765462240433.global`
+- **Domain**: `demoauth.global`
 
 ## Contributing
 
