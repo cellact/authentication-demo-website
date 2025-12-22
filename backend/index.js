@@ -12,7 +12,7 @@ const OASIS_SAPPHIRE_TESTNET_RPC = 'https://testnet.sapphire.oasis.io';
 
 // Hoodi Network Configuration
 const HOODI_CHAIN_ID = 560048;
-const DOMAIN_NAME = 'authdemo1765462240433'; // Your registered domain name (without .global)
+const DOMAIN_NAME = 'demoauth'; // Your registered domain name (without .global)
 
 // Email Configuration
 const EMAIL_USER = process.env.EMAIL_USER;
