@@ -304,10 +304,10 @@ async function handleCreateUser(req, res) {
     }
 
     // Validate username format (alphanumeric + underscore)
-    if (!/^[a-zA-Z0-9_]{3,20}$/.test(username)) {
+    if (!/^[a-zA-Z0-9_]+$/.test(username)) {
       res.status(400).json({ 
         success: false, 
-        error: 'Username must be 3-20 characters (alphanumeric and underscore only)' 
+        error: 'Username must be alphanumeric (letters, numbers, underscore only)' 
       });
       return;
     }
