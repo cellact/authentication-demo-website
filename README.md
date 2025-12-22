@@ -1,60 +1,56 @@
 # SIP auth_web3 Module Demo
 
-A demonstration of blockchain-based SIP authentication using the `auth_web3` module for Kamailio.
+A demonstration of blockchain-based SIP authentication using the `auth_web3` module for Kamailio/OpenSIPS.
 
-## 🎯 What This Is
+## Purpose
 
-This project showcases how to authenticate SIP users via blockchain smart contracts instead of traditional databases. User credentials are stored on:
-- **Oasis Sapphire** (confidential EVM blockchain) - for password storage
-- **Hoodi Network** (ENS-compatible chain) - for ENS identity mapping
+This repository demonstrates:
+- How to use the `auth_web3` module for blockchain-based SIP authentication
+- How the module works behind the scenes
+- The smart contract structure required for authentication
+- How to create your own users that can authenticate with the module
 
-## 🚀 Live Demo
+## Live Demo
 
 **Website**: [https://authdemo-omega.vercel.app](https://authdemo-omega.vercel.app)
 
-Create a free SIP account and test blockchain-based authentication in seconds!
+Create a test SIP account and make calls to see blockchain-based authentication in action. Your credentials will be stored on Oasis Sapphire blockchain and your ENS identity will be registered on the Hoodi network.
 
-## 📦 Project Structure
+## Project Structure
 
 ```
 authentication-demo-website/
-├── frontend/           # Web UI for account creation (Vite + Vanilla JS)
-├── backend/            # Cloud Function for ENS registration (Node.js)
-├── server-examples/    # Example SIP server configurations
-├── blockchain/         # Smart contract deployment scripts (coming soon)
-└── README.md          # This file
+├── frontend/           # Frontend of website - nothing too interesting or new here
+├── backend/            # Example of how to create a new user and add them to an existing system
+├── server-examples/    # Generic Kamailio and OpenSIPS configurations with auth_web3 specific cfg
+├── blockchain/         # Example code for the contracts themselves and deployment scripts if you want your own contracts
+└── README.md
 ```
 
-## 🔧 Components
-
 ### Frontend
-- **Tech**: Vite, Vanilla JavaScript, Firebase Auth
-- **Deploy**: Vercel
-- **Purpose**: User-friendly interface for creating blockchain-backed SIP accounts
+Web UI for account creation using Vite, Vanilla JavaScript, and Firebase Auth. Deployed on Vercel.
 
 ### Backend
-- **Tech**: Node.js, Google Cloud Functions, ethers.js
-- **Purpose**: 
-  - Register ENS subdomains on Hoodi
-  - Store credentials on Oasis Sapphire
-  - Send credentials via email
+Node.js Cloud Function demonstrating how to:
+- Register ENS subdomains on Hoodi
+- Store user credentials on Oasis Sapphire
+- Create users that work with the auth_web3 module
 
-### SIP Server
-- **Server**: Kamailio (OpenSIPS support coming soon)
-- **Module**: `auth_web3` - custom authentication module
-- **Purpose**: Authenticate SIP REGISTER/INVITE via blockchain RPC calls
+### Server Examples
+Generic SIP server configurations (Kamailio and OpenSIPS) showing the auth_web3-specific configuration blocks.
 
-## 🛠️ Setup
+### Blockchain
+Smart contract code and deployment scripts for setting up your own authentication system.
 
-### Prerequisites
+## Prerequisites
+
 - Node.js 18+
-- A SIP server (Kamailio) with `auth_web3` module
+- A SIP server (Kamailio or OpenSIPS) with `auth_web3` module installed
 - Oasis Sapphire testnet access
 - Hoodi network access
-- Firebase project (for Google OAuth)
-- Google Cloud account (for backend deployment)
+- Firebase project (for Google OAuth in the demo website)
 
-### Frontend Setup
+## Frontend Setup
 
 ```bash
 cd frontend
@@ -71,7 +67,7 @@ const firebaseConfig = {
 };
 ```
 
-### Backend Setup
+## Backend Setup
 
 ```bash
 cd backend
@@ -86,65 +82,41 @@ EMAIL_PASS=your_app_password
 EMAIL_FROM=your_email@gmail.com
 ```
 
-Deploy to Google Cloud Functions:
-```bash
-gcloud functions deploy helloHttp \
-  --runtime nodejs18 \
-  --trigger-http \
-  --allow-unauthenticated \
-  --entry-point helloHttp \
-  --set-env-vars EMAIL_USER=...,EMAIL_FROM=... \
-  --set-secrets EMAIL_PASS=...
-```
+The backend demonstrates how to create users that can authenticate with the auth_web3 module by interacting with the smart contracts.
 
-### SIP Server Setup
+## SIP Server Setup
 
-See `server-examples/kamailio_example.cfg` for a complete configuration example.
+See configuration examples in the `server-examples/` folder for Kamailio and OpenSIPS. These show the specific auth_web3 configuration blocks you need to add to your server.
 
-Key requirements:
-1. Load `auth_web3.so` module
-2. Configure blockchain RPC endpoints
-3. Use `web3_www_authenticate()` for REGISTER
-4. Use `web3_proxy_authenticate()` for INVITE
+## How Authentication Works
 
-## 🔐 How Authentication Works
-
-1. **User Registration** (via website):
-   - User logs in with Google
-   - Backend creates wallet address
-   - Password stored in Oasis Sapphire contract (encrypted)
-   - ENS subdomain registered on Hoodi
-   - Credentials emailed to user
+1. **User Registration** (via website/backend):
+   - User credentials are stored in a smart contract on Oasis Sapphire
+   - An ENS subdomain is registered on Hoodi network
+   - The ENS name maps to a wallet address that owns the password
 
 2. **SIP Authentication** (on REGISTER/INVITE):
    - Client sends SIP REGISTER with username/password
-   - Kamailio calls `web3_www_authenticate()`
-   - Module queries ENS on Hoodi for wallet address
-   - Module queries Oasis Sapphire contract to verify password
-   - Success = 200 OK, Failure = 401/407 challenge
+   - Kamailio/OpenSIPS calls `web3_www_authenticate()` or `web3_proxy_authenticate()`
+   - Module queries ENS on Hoodi to resolve the username to a wallet address
+   - Module queries the Oasis Sapphire contract to verify the password
+   - Authentication succeeds if the password matches
 
-## 📚 Resources
+## More Information
 
-- **auth_web3 Module**: [GitHub Repository](#) (coming soon)
-- **Oasis Sapphire**: [https://docs.oasis.io/sapphire](https://docs.oasis.io/sapphire)
-- **Hoodi Network**: [https://hoodi.network](https://hoodi.network)
-- **Kamailio**: [https://www.kamailio.org](https://www.kamailio.org)
+For detailed documentation about the auth_web3 module, visit:
+https://github.com/kamailio/kamailio/tree/master/src/modules/auth_web3
 
-## 🤝 Contributing
-
-Contributions welcome! This is a demo project to showcase blockchain-based SIP authentication.
-
-## 📄 License
-
-MIT License - feel free to use this as a reference for your own projects.
-
-## 🔗 Demo Contracts
+## Demo Contracts
 
 - **Authentication Contract** (Oasis Sapphire Testnet): `0xf4B4d8b8a9b1F104b2100F6d68e1ab21C3a2DF76`
 - **ENS Registry** (Hoodi): `0x5841d17010252BE760D055cba2f2853874457443`
 - **Domain**: `authdemo1765462240433.global`
 
-## 💬 Support
+## Contributing
 
-For questions about the `auth_web3` module or blockchain-based SIP authentication, feel free to open an issue!
+Contributions welcome! This is a demo project to showcase blockchain-based SIP authentication.
 
+## License
+
+MIT License - feel free to use this as a reference for your own projects.

@@ -17,12 +17,6 @@ We are working on adding example smart contracts and deployment scripts for:
 - Network configuration examples (Oasis Sapphire, Hoodi, etc.)
 - Initial setup and funding instructions
 
-### Testing Examples
-
-- Unit tests for authentication logic
-- Integration tests with Kamailio
-- Mock contract examples for development
-
 ## Current Demo Contracts
 
 For now, you can interact with our demo contracts:
