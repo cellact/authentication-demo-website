@@ -9,6 +9,7 @@ let generatedUsername = null;
 const authGate = document.getElementById('auth-gate');
 const mainApp = document.getElementById('main-app');
 const btnGoogleSignIn = document.getElementById('btn-google-signin');
+const btnEmailSignIn = document.getElementById('btn-email-signin');
 const btnSignOut = document.getElementById('btn-signout');
 const btnHowItWorks = document.getElementById('btn-how-it-works');
 const btnAdvancedInfo = document.getElementById('btn-advanced-info');
@@ -22,6 +23,12 @@ const btnSubmit = document.getElementById('btn-submit');
 const passwordInput = document.getElementById('password');
 const creationStatus = document.getElementById('creation-status');
 const successStatus = document.getElementById('success-status');
+const emailModal = document.getElementById('email-modal');
+const emailSignInForm = document.getElementById('email-signin-form');
+const emailInput = document.getElementById('email-input');
+const btnCancelEmail = document.getElementById('btn-cancel-email');
+const btnSendLink = document.getElementById('btn-send-link');
+const emailStatus = document.getElementById('email-status');
 
 // Step elements
 const step1 = document.getElementById('step-1');
@@ -43,11 +50,14 @@ document.addEventListener('DOMContentLoaded', () => {
 // Event Listeners
 function attachEventListeners() {
   btnGoogleSignIn.addEventListener('click', handleGoogleSignIn);
+  btnEmailSignIn.addEventListener('click', showEmailModal);
   btnSignOut.addEventListener('click', handleSignOut);
   btnHowItWorks.addEventListener('click', showHowItWorks);
   btnAdvancedInfo.addEventListener('click', showHowItWorks);
   btnBackToMain.addEventListener('click', showMainView);
   addUserForm.addEventListener('submit', handleAddUser);
+  emailSignInForm.addEventListener('submit', handleEmailSignIn);
+  btnCancelEmail.addEventListener('click', hideEmailModal);
   
   // Make Step 1 clickable to start
   document.getElementById('step-1-header').addEventListener('click', () => {
@@ -62,6 +72,11 @@ function attachEventListeners() {
 
 // Firebase Auth Functions
 function initializeAuth() {
+  // Check if user is returning from email link
+  if (window.isSignInWithEmailLink(window.firebaseAuth, window.location.href)) {
+    handleEmailLinkSignIn();
+  }
+  
   // Set up auth state monitoring
   window.onAuthStateChanged(window.firebaseAuth, (user) => {
     if (user) {
@@ -81,6 +96,26 @@ function initializeAuth() {
       mainApp.style.display = 'none';
     }
   });
+}
+
+async function handleEmailLinkSignIn() {
+  let email = window.localStorage.getItem('emailForSignIn');
+  
+  if (!email) {
+    // Ask user for email if not found in storage
+    email = window.prompt('Please provide your email for confirmation');
+  }
+  
+  if (!email) return;
+  
+  try {
+    await window.signInWithEmailLink(window.firebaseAuth, email, window.location.href);
+    window.localStorage.removeItem('emailForSignIn');
+    console.log('Successfully signed in with email link');
+  } catch (error) {
+    console.error('Error signing in with email link:', error);
+    alert('Failed to sign in with email link: ' + error.message);
+  }
 }
 
 async function handleGoogleSignIn() {
@@ -109,6 +144,67 @@ async function handleGoogleSignIn() {
   } finally {
     btnGoogleSignIn.disabled = false;
     btnGoogleSignIn.textContent = 'Sign in with Google';
+  }
+}
+
+function showEmailModal() {
+  emailModal.style.display = 'flex';
+  emailInput.value = '';
+  emailStatus.style.display = 'none';
+  emailInput.focus();
+}
+
+function hideEmailModal() {
+  emailModal.style.display = 'none';
+}
+
+// Close modal when clicking outside
+emailModal.addEventListener('click', (e) => {
+  if (e.target === emailModal) {
+    hideEmailModal();
+  }
+});
+
+async function handleEmailSignIn(e) {
+  e.preventDefault();
+  
+  const email = emailInput.value.trim();
+  if (!email) return;
+  
+  try {
+    btnSendLink.disabled = true;
+    btnSendLink.textContent = 'Sending...';
+    
+    const actionCodeSettings = {
+      url: window.location.href,
+      handleCodeInApp: true,
+    };
+    
+    await window.sendSignInLinkToEmail(window.firebaseAuth, email, actionCodeSettings);
+    
+    // Save email to localStorage so we can use it after redirect
+    window.localStorage.setItem('emailForSignIn', email);
+    
+    // Show success message
+    emailStatus.className = 'email-status success';
+    emailStatus.textContent = `✓ Sign-in link sent to ${email}! Check your inbox (including spam folder). You can close this window.`;
+    emailStatus.style.display = 'block';
+    
+    // Clear form
+    emailInput.value = '';
+    
+    // Don't auto-hide - let user close manually
+    // User can click Cancel or click outside modal
+    
+  } catch (error) {
+    console.error('Error sending sign-in link:', error);
+    
+    emailStatus.className = 'email-status error';
+    emailStatus.textContent = error.message || 'Failed to send sign-in link';
+    emailStatus.style.display = 'block';
+  } finally {
+    btnSendLink.disabled = false;
+    btnSendLink.textContent = 'Send Link';
   }
 }
 

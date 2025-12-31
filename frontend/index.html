@@ -25,6 +25,31 @@
           Sign in with Google
         </button>
         <p class="auth-note">Your credentials will be based on your Gmail, therefore we require you log in.</p>
+        
+        <div class="auth-divider">
+          <span>or</span>
+        </div>
+        
+        <button id="btn-email-signin" class="btn-secondary-auth">
+          📧 Sign in with Email
+        </button>
+        <p class="auth-note-secondary">For non-Gmail accounts</p>
+      </div>
+    </div>
+
+    <!-- Email Sign-In Modal -->
+    <div id="email-modal" class="modal" style="display: none;">
+      <div class="modal-content">
+        <h2>Sign in with Email</h2>
+        <p>Enter your email address and we'll send you a secure sign-in link</p>
+        <form id="email-signin-form">
+          <input type="email" id="email-input" placeholder="your@email.com" required>
+          <div class="modal-buttons">
+            <button type="button" id="btn-cancel-email" class="btn-secondary">Cancel</button>
+            <button type="submit" id="btn-send-link" class="btn-primary">Send Link</button>
+          </div>
+        </form>
+        <div id="email-status" class="email-status" style="display: none;"></div>
       </div>
     </div>
 
@@ -246,7 +271,7 @@ function getWalletAddress(
   <!-- Firebase SDK -->
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 
     const firebaseConfig = {
       apiKey: "AIzaSyDJYM5wA-mzzap1OeVYxig0ZQTzFs2FqNo",
@@ -268,6 +293,9 @@ function getWalletAddress(
     window.signInWithPopup = signInWithPopup;
     window.signOut = signOut;
     window.onAuthStateChanged = onAuthStateChanged;
+    window.sendSignInLinkToEmail = sendSignInLinkToEmail;
+    window.isSignInWithEmailLink = isSignInWithEmailLink;
+    window.signInWithEmailLink = signInWithEmailLink;
   </script>
   <script type="module" src="/index.js"></script>
   </body>
