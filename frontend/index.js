@@ -359,7 +359,7 @@ async function handleAddUser(e) {
     
   } catch (err) {
     console.error('Error creating user:', err);
-    showError(err.message || 'Failed to create user');
+    showError('An unexpected error has occurred during user creation. Please refresh the page and try again.');
     creationStatus.style.display = 'none';
     // Re-enable step 1 on error
     isCreatingUser = false;
