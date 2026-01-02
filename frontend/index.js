@@ -4,6 +4,7 @@ const API_URL = 'https://demo-website-backend-309305771885.us-central1.run.app';
 // State
 let currentUser = null; // Firebase user
 let generatedUsername = null;
+let isCreatingUser = false; // Double-submit protection
 
 // DOM Elements
 const authGate = document.getElementById('auth-gate');
@@ -293,6 +294,12 @@ function markStepComplete(stepNumber) {
 async function handleAddUser(e) {
   e.preventDefault();
   
+  // Double-submit protection
+  if (isCreatingUser) {
+    console.log('User creation already in progress');
+    return;
+  }
+  
   if (!generatedUsername) {
     showError('Username not generated');
     return;
@@ -307,6 +314,8 @@ async function handleAddUser(e) {
   }
   
   try {
+    // Set flag and disable button immediately
+    isCreatingUser = true;
     btnSubmit.disabled = true;
     btnSubmit.textContent = 'Creating...';
     
@@ -319,6 +328,7 @@ async function handleAddUser(e) {
     successStatus.style.display = 'none';
     
     // Call GCP function to create user on Oasis
+    // Note: No timeout set - waits for full response (can take 10+ minutes)
     const response = await fetch(API_URL, {
       method: 'POST',
       headers: {
@@ -329,7 +339,7 @@ async function handleAddUser(e) {
         password,
         authUsername: username,
         domain: 'demo.hoodi.network',
-        email: currentUser?.email || null
+        email: currentUser.email
       })
     });
     
@@ -343,17 +353,15 @@ async function handleAddUser(e) {
     creationStatus.style.display = 'none';
     successStatus.style.display = 'block';
     
-    // After delay, mark step 2 complete and unlock step 3
-    setTimeout(() => {
-      markStepComplete(2);
-      unlockAndExpandStep(3);
-    }, 4000);
+    // Show "Continue" button to proceed to step 3
+    document.getElementById('btn-continue-step3').style.display = 'inline-block';
     
   } catch (err) {
     console.error('Error creating user:', err);
     showError(err.message || 'Failed to create user');
     creationStatus.style.display = 'none';
     // Re-enable step 1 on error
+    isCreatingUser = false;
     btnSubmit.disabled = false;
     btnSubmit.textContent = 'Create Account';
   }
@@ -364,6 +372,15 @@ function resetCreationStatus() {
   successStatus.style.display = 'none';
   passwordInput.value = '';
 }
+
+function continueToStep3() {
+  markStepComplete(2);
+  unlockAndExpandStep(3);
+  document.getElementById('btn-continue-step3').style.display = 'none';
+}
+
+// Make function available globally for onclick
+window.continueToStep3 = continueToStep3;
 
 // No delete function needed - credentials managed via email
 

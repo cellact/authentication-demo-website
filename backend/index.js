@@ -354,7 +354,6 @@ async function handleCreateUser(req, res) {
     // Create user on Oasis Sapphire (password stored as bytes)
     console.log('Calling storeSecret on ConfidentialAuth contract...');
     const passwordBytes = ethers.utils.toUtf8Bytes(password);
-    console.log('Password as bytes:', ethers.utils.hexlify(passwordBytes));
     
     const tx = await confidentialAuth.storeSecret(username, passwordBytes);
     console.log('Transaction submitted:', tx.hash);
