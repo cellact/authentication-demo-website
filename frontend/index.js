@@ -1,6 +1,6 @@
 // Configuration
-const API_URL = 'http://localhost:8080'; // Local backend for testing
-// const API_URL = 'https://demo-website-backend-309305771885.us-central1.run.app'; // Production
+// const API_URL = 'http://localhost:8080'; // Local backend for testing
+const API_URL = 'https://demo-website-backend-309305771885.us-central1.run.app'; // Production
 
 // State
 let currentUser = null; // Firebase user
