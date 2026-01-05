@@ -28,6 +28,10 @@ const successStatus = document.getElementById('success-status');
 const emailModal = document.getElementById('email-modal');
 const emailSignInForm = document.getElementById('email-signin-form');
 const emailInput = document.getElementById('email-input');
+const introScreen = document.getElementById('intro-screen');
+const stepsContainer = document.getElementById('steps-container');
+const btnStartProcess = document.getElementById('btn-start-process');
+const btnBackToIntro = document.getElementById('btn-back-to-intro');
 const btnCancelEmail = document.getElementById('btn-cancel-email');
 const btnSendLink = document.getElementById('btn-send-link');
 const emailStatus = document.getElementById('email-status');
@@ -60,6 +64,8 @@ function attachEventListeners() {
   addUserForm.addEventListener('submit', handleAddUser);
   emailSignInForm.addEventListener('submit', handleEmailSignIn);
   btnCancelEmail.addEventListener('click', hideEmailModal);
+  btnStartProcess.addEventListener('click', startProcess);
+  btnBackToIntro.addEventListener('click', backToIntro);
   
   // Make Step 1 clickable to start
   document.getElementById('step-1-header').addEventListener('click', () => {
@@ -231,7 +237,7 @@ function generateUsername(email) {
 // No storage functions needed - everything sent via email
 
 // UI Functions
-function showError(message) {
+function showError(message, autoHide = true) {
   // Reset to error styling (in case it was used for success)
   errorEl.style.background = '#fee';
   errorEl.style.color = '#c00';
@@ -240,12 +246,16 @@ function showError(message) {
   errorEl.textContent = message;
   errorEl.style.display = 'block';
   
-  // Longer timeout for longer messages
-  const timeout = message.length > 50 ? 8000 : 5000;
-  
-  setTimeout(() => {
-    errorEl.style.display = 'none';
-  }, timeout);
+  // Only auto-hide if specified (default true for backwards compatibility)
+  if (autoHide) {
+    // Longer timeout for longer messages
+    const timeout = message.length > 50 ? 8000 : 5000;
+    
+    setTimeout(() => {
+      errorEl.style.display = 'none';
+    }, timeout);
+  }
+  // If autoHide is false, error stays visible until user takes action
 }
 
 function showHowItWorks() {
@@ -257,6 +267,17 @@ function showHowItWorks() {
 function showMainView() {
   howItWorksView.style.display = 'none';
   mainView.style.display = 'block';
+  window.scrollTo(0, 0);
+}
+
+function startProcess() {
+  introScreen.style.display = 'none';
+  stepsContainer.style.display = 'block';
+}
+
+function backToIntro() {
+  stepsContainer.style.display = 'none';
+  introScreen.style.display = 'block';
   window.scrollTo(0, 0);
 }
 
@@ -359,12 +380,11 @@ async function handleAddUser(e) {
     
   } catch (err) {
     console.error('Error creating user:', err);
-    showError('An unexpected error has occurred during user creation. Please refresh the page and try again.');
+    showError('An unexpected error has occurred during user creation. Please refresh the page and try again.', false);
     creationStatus.style.display = 'none';
-    // Re-enable step 1 on error
-    isCreatingUser = false;
-    btnSubmit.disabled = false;
-    btnSubmit.textContent = 'Create Account';
+    // DO NOT re-enable button - force user to refresh the page
+    // Keep isCreatingUser = true and button disabled to prevent retry without refresh
+    btnSubmit.textContent = 'Please Refresh Page';
   }
 }
 

@@ -11,8 +11,36 @@
     <!-- Auth Gate (shown when not logged in) -->
     <div id="auth-gate" style="display: none;">
       <div class="auth-container">
-        <h1>SIP auth_web3 Module Demo</h1>
-        <p>Demonstrating blockchain-based SIP authentication with <code>auth_web3</code> module</p>
+        <h1>Auth_web3 SIP Module Demo</h1>
+        <p class="subtitle">Demonstrating blockchain-based SIP authentication with <code>auth_web3</code> module</p>
+        
+        <h2 class="what-will-you-do">What will you do?</h2>
+        
+        <div class="auth-steps">
+          <div class="auth-step">
+            <div class="step-number-circle">1</div>
+            <div>
+              <p class="step-text"><strong>Sign in to get started</strong></p>
+              <p class="step-explanation">Your credentials will be based on your email, therefore we require you log in.</p>
+            </div>
+          </div>
+          <div class="auth-step">
+            <div class="step-number-circle">2</div>
+            <div>
+              <p class="step-text"><strong>Create credentials for free</strong></p>
+              <p class="step-explanation">You'll receive them in your inbox</p>
+            </div>
+          </div>
+          <div class="auth-step">
+            <div class="step-number-circle">3</div>
+            <div>
+              <p class="step-text"><strong>Use them to register to our server</strong></p>
+              <p class="step-explanation">At kama6.cellact.nl and make calls</p>
+            </div>
+          </div>
+        </div>
+        
+        <p class="sign-in-label">Sign in with:</p>
         
         <button id="btn-google-signin" class="btn-google">
           <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
@@ -22,16 +50,15 @@
             <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
             <path fill="none" d="M0 0h48v48H0z"/>
           </svg>
-          Sign in with Google
+          Google
         </button>
-        <p class="auth-note">Your credentials will be based on your Gmail, therefore we require you log in.</p>
         
         <div class="auth-divider">
           <span>or</span>
         </div>
         
         <button id="btn-email-signin" class="btn-secondary-auth">
-          📧 Sign in with Email
+          📧 Email
         </button>
         <p class="auth-note-secondary">For non-Gmail accounts</p>
       </div>
@@ -84,10 +111,18 @@
           <button id="btn-advanced-info" class="btn-info">Advanced Info</button>
         </div>
 
-        <!-- Introduction Text -->
-        <div class="step-intro">
+        <!-- Introduction Screen (shown first) -->
+        <div id="intro-screen" class="intro-screen">
           <p><strong>What you will do?</strong> Create credentials for a SIP account that will be able to authenticate using the <code>auth_web3</code> module.</p>
           <p>You'll receive an <strong>Username</strong>, <strong>Auth Username</strong>, and <strong>Password</strong> via Gmail. Use these to register to <code>kama6.cellact.nl</code> (UDP transport) on any SIP client. Once registered, call other users or dial <code>asteriskTest</code> which is our IVR.</p>
+          <button id="btn-start-process" class="btn-create" style="margin-top: 20px;">OK</button>
+        </div>
+
+        <!-- Steps Container (hidden initially) -->
+        <div id="steps-container" style="display: none;">
+        
+        <div class="back-button-container">
+          <button id="btn-back-to-intro" class="btn-secondary">← Back to Instructions</button>
         </div>
 
         <!-- Step 1: Your Credentials -->
@@ -177,6 +212,8 @@
             </ul>
           </div>
         </div>
+
+        </div><!-- End of steps-container -->
       </div>
     </main>
 
