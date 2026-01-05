@@ -74,6 +74,11 @@ function attachEventListeners() {
       step1Content.classList.add('expanded');
       document.getElementById('step-1-header').classList.add('active');
       document.getElementById('step-1-status').textContent = '';
+      
+      // Scroll to step 1 after a short delay to allow content to expand
+      setTimeout(() => {
+        step1.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
     }
   });
 }
@@ -299,7 +304,7 @@ function unlockAndExpandStep(stepNumber) {
   
   // Scroll to new step
   setTimeout(() => {
-    step.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    step.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, 100);
 }
 
