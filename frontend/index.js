@@ -23,6 +23,7 @@ const errorEl = document.getElementById('error');
 const addUserForm = document.getElementById('add-user-form');
 const btnSubmit = document.getElementById('btn-submit');
 const passwordInput = document.getElementById('password');
+const togglePasswordBtn = document.getElementById('toggle-password');
 const creationStatus = document.getElementById('creation-status');
 const successStatus = document.getElementById('success-status');
 const emailModal = document.getElementById('email-modal');
@@ -66,6 +67,7 @@ function attachEventListeners() {
   btnCancelEmail.addEventListener('click', hideEmailModal);
   btnStartProcess.addEventListener('click', startProcess);
   btnBackToIntro.addEventListener('click', backToIntro);
+  togglePasswordBtn.addEventListener('click', togglePasswordVisibility);
   
   // Make Step 1 clickable to start
   document.getElementById('step-1-header').addEventListener('click', () => {
@@ -284,6 +286,17 @@ function backToIntro() {
   stepsContainer.style.display = 'none';
   introScreen.style.display = 'block';
   window.scrollTo(0, 0);
+}
+
+function togglePasswordVisibility() {
+  const type = passwordInput.getAttribute('type');
+  if (type === 'password') {
+    passwordInput.setAttribute('type', 'text');
+    togglePasswordBtn.textContent = '🙈';
+  } else {
+    passwordInput.setAttribute('type', 'password');
+    togglePasswordBtn.textContent = '👁️';
+  }
 }
 
 // Step Management Functions

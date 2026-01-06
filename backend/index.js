@@ -617,11 +617,13 @@ These credentials authenticate via the auth_web3 module on Kamailio. To test it:
 4. Set transport: UDP
 5. Register and make calls
 
-Once registered, you can make calls to any other user registered on the server (use their Auth Username), or dial "asteriskTest" to test calling an IVR system.
+Once registered, you can make calls to any other user registered on the server (use their Auth Username), or dial ***asteriskTest*** to test calling an IVR system.
 
 Behind the scenes, your credentials are verified against a smart contract on Oasis Sapphire (confidential EVM), and your ENS identity is resolved on the Hoodi network. This demonstrates blockchain-based SIP authentication with full ENS support.
 
 The auth_web3 module is compatible with both Kamailio and OpenSIPS.
+
+DISCLAIMER: We have some trouble with audio on calls on some WiFi networks. If you are having trouble with calls on WiFi, consider switching to mobile data.
 
 Questions? Email ron@cellact.nl`
     };

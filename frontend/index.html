@@ -143,7 +143,12 @@
               </div>
               <div>
                 <label>Choose a password</label>
-                <input type="text" id="password" name="password" required placeholder="Enter a password">
+                <div class="password-input-wrapper">
+                  <input type="password" id="password" name="password" required placeholder="Enter a password">
+                  <button type="button" id="toggle-password" class="toggle-password" aria-label="Toggle password visibility">
+                    👁️
+                  </button>
+                </div>
                 <small class="username-note">Account details will be sent to your Gmail</small>
               </div>
               

@@ -48,6 +48,35 @@ input:focus {
   box-shadow: 0 0 0 3px rgba(107, 164, 58, 0.1);
 }
 
+.password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-input-wrapper input {
+  flex: 1;
+  padding-right: 45px;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 8px;
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 5px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s;
+}
+
+.toggle-password:hover {
+  opacity: 0.7;
+}
+
 /* App Layout */
 .app {
   max-width: 1000px;
@@ -135,6 +164,31 @@ input:focus {
   font-size: 18px;
   font-weight: 700;
   flex-shrink: 0;
+  animation: pulse-glow 3.5s ease-in-out infinite;
+  box-shadow: 0 0 0 0 rgba(107, 164, 58, 0.7);
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(107, 164, 58, 0.7);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 10px rgba(107, 164, 58, 0);
+  }
+}
+
+.auth-step:nth-child(1) .step-number-circle {
+  animation-delay: 0s;
+}
+
+.auth-step:nth-child(2) .step-number-circle {
+  animation-delay: 0.5s;
+}
+
+.auth-step:nth-child(3) .step-number-circle {
+  animation-delay: 1s;
 }
 
 .step-text {
@@ -772,10 +826,26 @@ main {
   justify-content: center;
   font-weight: 700;
   font-size: 18px;
+  animation: pulse-glow 3.5s ease-in-out infinite;
+  box-shadow: 0 0 0 0 rgba(107, 164, 58, 0.7);
 }
 
 .accordion-step.locked .step-number {
   background: #999;
+  animation: none;
+  box-shadow: none;
+}
+
+.accordion-step[data-step="1"] .step-number {
+  animation-delay: 0s;
+}
+
+.accordion-step[data-step="2"] .step-number {
+  animation-delay: 0.5s;
+}
+
+.accordion-step[data-step="3"] .step-number {
+  animation-delay: 1s;
 }
 
 .accordion-header h3 {
@@ -1174,5 +1244,480 @@ main {
   font-family: 'Courier New', monospace;
   font-size: 14px;
   color: #6ba43a;
+}
+
+/* ===================================
+   MOBILE RESPONSIVE STYLES
+   =================================== */
+
+/* Tablet and small desktop */
+@media (max-width: 768px) {
+  body {
+    padding: 10px;
+  }
+
+  header {
+    padding: 15px 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .header-left {
+    flex: 1 1 100%;
+  }
+
+  header h1 {
+    font-size: 18px;
+  }
+
+  .header-subtitle {
+    font-size: 12px;
+  }
+
+  .header-actions {
+    flex: 1 1 100%;
+    gap: 10px;
+  }
+
+  .btn-github, .btn-info-header {
+    padding: 8px 14px;
+    font-size: 13px;
+  }
+
+  .user-email {
+    font-size: 12px;
+    padding: 8px 12px;
+  }
+
+  .panel {
+    padding: 30px 20px;
+    margin: 10px auto;
+  }
+
+  .auth-container {
+    padding: 35px 25px;
+    max-width: 100%;
+  }
+
+  .auth-container h1 {
+    font-size: 24px;
+  }
+
+  .subtitle {
+    font-size: 14px;
+  }
+
+  .what-will-you-do {
+    font-size: 20px;
+  }
+
+  .auth-step {
+    padding: 18px 0;
+  }
+
+  .step-number-circle {
+    width: 45px;
+    height: 45px;
+    font-size: 20px;
+  }
+
+  .step-text {
+    font-size: 15px;
+  }
+
+  .step-explanation {
+    font-size: 13px;
+  }
+
+  .btn-google, .btn-secondary-auth {
+    padding: 14px 24px;
+    font-size: 15px;
+  }
+
+  /* Accordion steps */
+  .accordion-step {
+    margin-bottom: 15px;
+  }
+
+  .accordion-header {
+    padding: 18px;
+  }
+
+  .accordion-header h3 {
+    font-size: 18px;
+  }
+
+  .accordion-step .step-number {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+  }
+
+  .accordion-content.expanded {
+    padding: 20px 18px;
+  }
+
+  /* Intro screen */
+  .intro-screen {
+    padding: 40px 25px;
+  }
+
+  .intro-screen p {
+    font-size: 15px;
+  }
+}
+
+/* Mobile phones */
+@media (max-width: 480px) {
+  body {
+    padding: 5px;
+  }
+
+  header {
+    padding: 12px 10px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .header-left {
+    width: 100%;
+  }
+
+  header h1 {
+    font-size: 16px;
+  }
+
+  .header-subtitle {
+    font-size: 11px;
+  }
+
+  .header-actions {
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: flex-start;
+  }
+
+  .btn-github {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  .btn-info-header {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  .user-email {
+    font-size: 11px;
+    padding: 6px 10px;
+    flex: 1 1 100%;
+    text-align: center;
+  }
+
+  .btn-secondary {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  .panel {
+    padding: 20px 15px;
+    margin: 5px auto;
+  }
+
+  .auth-container {
+    padding: 25px 20px;
+    max-width: 100%;
+  }
+
+  .auth-container h1 {
+    font-size: 20px;
+    line-height: 1.3;
+  }
+
+  .subtitle {
+    font-size: 13px;
+    margin-bottom: 20px;
+  }
+
+  .what-will-you-do {
+    font-size: 18px;
+    margin-bottom: 20px;
+  }
+
+  .auth-steps {
+    margin-bottom: 25px;
+  }
+
+  .auth-step {
+    padding: 15px 0;
+  }
+
+  .step-number-circle {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+    margin-right: 12px;
+  }
+
+  .step-text {
+    font-size: 14px;
+  }
+
+  .step-explanation {
+    font-size: 12px;
+    margin-top: 4px;
+  }
+
+  .sign-in-label {
+    font-size: 14px;
+    margin-bottom: 12px;
+  }
+
+  .btn-google, .btn-secondary-auth {
+    padding: 12px 20px;
+    font-size: 14px;
+    width: 100%;
+  }
+
+  .btn-google svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .auth-note, .auth-note-secondary {
+    font-size: 11px;
+  }
+
+  /* Accordion steps */
+  .accordion-step {
+    margin-bottom: 12px;
+  }
+
+  .accordion-header {
+    padding: 15px;
+    flex-wrap: wrap;
+  }
+
+  .accordion-header-left {
+    gap: 10px;
+  }
+
+  .accordion-header h3 {
+    font-size: 16px;
+  }
+
+  .accordion-step .step-number {
+    width: 32px;
+    height: 32px;
+    font-size: 15px;
+  }
+
+  .step-status {
+    font-size: 13px;
+    width: 100%;
+    text-align: left;
+    margin-top: 8px;
+    padding-left: 42px;
+  }
+
+  .accordion-content.expanded {
+    padding: 18px 15px;
+  }
+
+  /* Form elements */
+  .form label {
+    font-size: 14px;
+  }
+
+  .form input, .form select {
+    font-size: 14px;
+    padding: 11px;
+  }
+
+  .password-input-wrapper {
+    flex-wrap: nowrap;
+  }
+
+  .toggle-password {
+    font-size: 18px;
+    padding: 0 12px;
+  }
+
+  .username-note {
+    font-size: 11px;
+  }
+
+  .btn-create, .btn-primary, .btn-secondary {
+    padding: 12px 20px;
+    font-size: 14px;
+    width: 100%;
+  }
+
+  /* Username display */
+  .username-display label {
+    font-size: 13px;
+  }
+
+  .generated-username {
+    font-size: 16px;
+    padding: 12px;
+  }
+
+  /* Credentials explanation */
+  .credentials-explanation {
+    padding: 15px;
+    margin: 15px 0;
+  }
+
+  .credentials-explanation p {
+    font-size: 13px;
+  }
+
+  .credentials-explanation ul {
+    font-size: 12px;
+  }
+
+  .credentials-explanation li {
+    margin-bottom: 8px;
+  }
+
+  /* Status indicators */
+  .creation-status, .success-status {
+    padding: 20px;
+  }
+
+  .spinner {
+    width: 35px;
+    height: 35px;
+    border-width: 3px;
+  }
+
+  .status-text p {
+    font-size: 14px;
+  }
+
+  .success-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 28px;
+  }
+
+  /* Intro screen */
+  .intro-screen {
+    padding: 30px 20px;
+  }
+
+  .intro-screen p {
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  .intro-screen code {
+    font-size: 12px;
+    padding: 2px 6px;
+  }
+
+  /* Back button */
+  .back-button-container {
+    margin-bottom: 15px;
+  }
+
+  /* Error/notification messages */
+  .error-message, .notification {
+    font-size: 13px;
+    padding: 12px;
+    margin: 15px 0;
+  }
+
+  /* How it works page */
+  #how-it-works-view h2 {
+    font-size: 22px;
+  }
+
+  #how-it-works-view h3 {
+    font-size: 18px;
+  }
+
+  #how-it-works-view p, #how-it-works-view li {
+    font-size: 14px;
+  }
+
+  #how-it-works-view code {
+    font-size: 12px;
+  }
+
+  #how-it-works-view .code-block {
+    padding: 15px;
+    font-size: 11px;
+    margin: 15px 0;
+  }
+
+  /* Email modal */
+  .modal-content {
+    padding: 25px 20px;
+    margin: 20px;
+    max-width: calc(100% - 40px);
+  }
+
+  .modal-content h2 {
+    font-size: 20px;
+  }
+
+  .modal-content input {
+    font-size: 14px;
+    padding: 11px;
+  }
+
+  .modal-content button {
+    padding: 12px;
+    font-size: 14px;
+  }
+
+  .close-modal {
+    font-size: 26px;
+  }
+}
+
+/* Very small phones */
+@media (max-width: 360px) {
+  .auth-container h1 {
+    font-size: 18px;
+  }
+
+  .what-will-you-do {
+    font-size: 16px;
+  }
+
+  .step-number-circle {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+    margin-right: 10px;
+  }
+
+  .step-text {
+    font-size: 13px;
+  }
+
+  .step-explanation {
+    font-size: 11px;
+  }
+
+  .accordion-step .step-number {
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+  }
+
+  .accordion-header h3 {
+    font-size: 15px;
+  }
+
+  .btn-google, .btn-secondary-auth {
+    font-size: 13px;
+    padding: 10px 16px;
+  }
 }
 
