@@ -55,16 +55,28 @@ Smart contract code and deployment scripts for setting up your own authenticatio
 ```bash
 cd frontend
 npm install
-npm run dev
 ```
 
-Configure Firebase in `index.html`:
-```javascript
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID"
-};
+Create `.env` file (copy from `.env.example`):
+```bash
+cp .env.example .env
+```
+
+Edit `.env` with your Firebase credentials:
+```env
+VITE_FIREBASE_API_KEY=your_firebase_api_key
+VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your_project_id
+VITE_FIREBASE_STORAGE_BUCKET=your_project.firebasestorage.app
+VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+VITE_FIREBASE_APP_ID=your_app_id
+VITE_FIREBASE_MEASUREMENT_ID=your_measurement_id
+VITE_API_URL=https://your-backend-url.run.app
+```
+
+Run the development server:
+```bash
+npm run dev
 ```
 
 ## Backend Setup
@@ -74,12 +86,18 @@ cd backend
 npm install
 ```
 
-Create `.env` file:
+Create `.env` file (copy from `.env.example`):
+```bash
+cp .env.example .env
+```
+
+Edit `.env` with your credentials:
 ```env
 PKEY=your_wallet_private_key
-EMAIL_USER=your_email@gmail.com
-EMAIL_PASS=your_app_password
-EMAIL_FROM=your_email@gmail.com
+EMAIL_USER=your_gmail_address@gmail.com
+EMAIL_PASS=your_gmail_app_password
+EMAIL_FROM=your_gmail_address@gmail.com
+MAINTAINER_EMAIL=admin@example.com
 ```
 
 The backend demonstrates how to create users that can authenticate with the auth_web3 module by interacting with the smart contracts.
@@ -116,6 +134,13 @@ https://github.com/kamailio/kamailio/tree/master/src/modules/auth_web3
 ## Contributing
 
 Contributions welcome! This is a demo project to showcase blockchain-based SIP authentication.
+
+## Security Notes
+
+- Firebase API keys are intentionally public (they identify your project, not authenticate it)
+- Security is enforced via Firebase domain restrictions and authentication rules
+- Never commit your `.env` files - they contain private keys and credentials
+- The backend wallet private key (`PKEY`) must be kept secret
 
 ## License
 
