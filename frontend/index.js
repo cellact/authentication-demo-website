@@ -67,6 +67,7 @@ function attachEventListeners() {
   btnStartProcess.addEventListener('click', startProcess);
   btnBackToIntro.addEventListener('click', backToIntro);
   togglePasswordBtn.addEventListener('click', togglePasswordVisibility);
+  passwordInput.addEventListener('input', validatePassword);
   
   // Make Step 1 clickable to start
   document.getElementById('step-1-header').addEventListener('click', () => {
@@ -295,6 +296,29 @@ function togglePasswordVisibility() {
   } else {
     passwordInput.setAttribute('type', 'password');
     togglePasswordBtn.textContent = '👁️';
+  }
+}
+
+function validatePassword() {
+  const password = passwordInput.value;
+  const passwordHint = document.getElementById('password-hint');
+  
+  if (password.length < 6) {
+    btnSubmit.disabled = true;
+    btnSubmit.style.opacity = '0.5';
+    btnSubmit.style.cursor = 'not-allowed';
+    if (passwordHint) {
+      passwordHint.style.color = '#c00';
+      passwordHint.style.fontWeight = '600';
+    }
+  } else {
+    btnSubmit.disabled = false;
+    btnSubmit.style.opacity = '1';
+    btnSubmit.style.cursor = 'pointer';
+    if (passwordHint) {
+      passwordHint.style.color = '#6ba43a';
+      passwordHint.style.fontWeight = '600';
+    }
   }
 }
 

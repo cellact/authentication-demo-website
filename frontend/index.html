@@ -144,11 +144,12 @@
               <div>
                 <label>Choose a password</label>
                 <div class="password-input-wrapper">
-                  <input type="password" id="password" name="password" required placeholder="Enter a password">
+                  <input type="password" id="password" name="password" required placeholder="Enter a password (min 6 characters)" minlength="6">
                   <button type="button" id="toggle-password" class="toggle-password" aria-label="Toggle password visibility">
                     👁️
                   </button>
                 </div>
+                <small class="username-note" id="password-hint">Password must be at least 6 characters</small>
                 <small class="username-note">Account details will be sent to your Gmail</small>
               </div>
               
